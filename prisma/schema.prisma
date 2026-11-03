@@ -1,0 +1,243 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  DRIVER
+  BILLING_EXEC
+}
+
+enum BillingCycle {
+  WEEKLY
+  FORTNIGHTLY
+  MONTHLY
+}
+
+enum TripStatus {
+  ASSIGNED
+  POD_PENDING
+  AI_CHECKING
+  RETAKE_REQUESTED
+  NEEDS_REVIEW
+  VERIFIED
+  DISPUTED
+  EXPORTED
+  INVOICED
+  UNASSIGNED
+}
+
+enum PodSubmissionStatus {
+  UPLOADED
+  AI_CHECKING
+  VERIFIED
+  RETAKE
+  REVIEW
+}
+
+enum Verdict {
+  VERIFIED
+  RETAKE
+  REVIEW
+}
+
+enum ReviewActionType {
+  APPROVE
+  APPROVE_WITH_REMARK
+  CORRECT_FIELDS
+  MARK_DISPUTED
+  REQUEST_RETAKE
+}
+
+model Branch {
+  id        String   @id @default(uuid())
+  name      String   @unique
+  users     User[]
+  trips     Trip[]
+  createdAt DateTime @default(now())
+}
+
+model User {
+  id            String         @id @default(uuid())
+  name          String
+  role          UserRole
+  phone         String?        @unique
+  email         String?        @unique
+  pinHash       String?
+  passwordHash  String?
+  branchId      String?
+  language      String?
+  branch        Branch?        @relation(fields: [branchId], references: [id])
+  defaultFor    Vehicle[]      @relation("DefaultDriver")
+  trips         Trip[]         @relation("TripDriver")
+  reviewActions ReviewAction[]
+  exportBatches ExportBatch[]
+  auditLogs     AuditLog[]
+  createdAt     DateTime       @default(now())
+
+  @@index([branchId])
+}
+
+model Client {
+  id              String        @id @default(uuid())
+  name            String        @unique
+  billingCycle    BillingCycle
+  tallyLedgerName String
+  trips           Trip[]
+  exportBatches   ExportBatch[]
+  createdAt       DateTime      @default(now())
+}
+
+model Vehicle {
+  vehicleNo       String  @id
+  isHired         Boolean @default(false)
+  defaultDriverId String?
+  defaultDriver   User?   @relation("DefaultDriver", fields: [defaultDriverId], references: [id])
+  trips           Trip[]
+}
+
+model Trip {
+  id                 String      @id @default(uuid())
+  tripCode           String      @unique
+  clientId           String
+  vehicleNo          String
+  isHired            Boolean     @default(false)
+  driverId           String?
+  driverPhone        String?
+  branchId           String
+  origin             String
+  destination        String
+  freight            Decimal     @db.Decimal(12, 2)
+  lrNumber           String
+  ewayBillNo         String
+  goodsDescription   String
+  expectedQuantity   Decimal     @db.Decimal(10, 2)
+  quantityUnit       String
+  deliveredQuantity  Decimal?    @db.Decimal(10, 2)
+  deliveredAt        DateTime?
+  podReceivedAt      DateTime?
+  verifiedAt         DateTime?
+  invoicedAt         DateTime?
+  status             TripStatus  @default(ASSIGNED)
+  statusReason       String?
+  retakeCount        Int         @default(0)
+  consigneeName      String?
+  consigneePhone     String?
+
+  client             Client      @relation(fields: [clientId], references: [id])
+  vehicle            Vehicle     @relation(fields: [vehicleNo], references: [vehicleNo])
+  driver             User?       @relation("TripDriver", fields: [driverId], references: [id])
+  branch             Branch      @relation(fields: [branchId], references: [id])
+
+  podSubmissions     PodSubmission[]
+  reviewActions      ReviewAction[]
+  uploadLinks        UploadLink[]
+  createdAt          DateTime    @default(now())
+  updatedAt          DateTime    @updatedAt
+
+  @@unique([clientId, lrNumber])
+
+  @@index([driverId, status])
+  @@index([status])
+  @@index([clientId, status])
+  @@index([branchId])
+  @@index([deliveredAt])
+  @@index([podReceivedAt])
+}
+
+model PodSubmission {
+  id         String               @id
+  tripId     String
+  attemptNo  Int
+  imageKey   String
+  sizeKb     Int
+  gpsLat     Float?
+  gpsLng     Float?
+  capturedAt DateTime
+  uploadedAt DateTime             @default(now())
+  status     PodSubmissionStatus
+  trip       Trip                 @relation(fields: [tripId], references: [id])
+  extraction PodExtraction?
+
+  @@unique([tripId, attemptNo])
+  @@index([tripId, uploadedAt])
+}
+
+model PodExtraction {
+  submissionId String        @id
+  fields       Json
+  confidences  Json
+  verdict      Verdict
+  reasons      String[]
+  modelName    String
+  rawResponse  Json?
+  submission   PodSubmission @relation(fields: [submissionId], references: [id])
+  createdAt    DateTime      @default(now())
+}
+
+model ReviewAction {
+  id           String           @id @default(uuid())
+  tripId       String
+  reviewerId   String
+  action       ReviewActionType
+  fieldChanges Json
+  note         String?
+  at           DateTime         @default(now())
+  trip         Trip             @relation(fields: [tripId], references: [id])
+  reviewer     User             @relation(fields: [reviewerId], references: [id])
+
+  @@index([tripId, at])
+}
+
+model ExportBatch {
+  id           String   @id @default(uuid())
+  clientId     String
+  cycleLabel   String
+  tripIds      String[]
+  exportedById String
+  exportedAt   DateTime @default(now())
+  fileKey      String
+  client       Client   @relation(fields: [clientId], references: [id])
+  exportedBy   User     @relation(fields: [exportedById], references: [id])
+
+  @@index([clientId, exportedAt])
+}
+
+model UploadLink {
+  id        String   @id @default(uuid())
+  tokenHash String   @unique
+  tripId    String
+  expiresAt DateTime
+  usedAt    DateTime?
+  trip      Trip     @relation(fields: [tripId], references: [id])
+
+  @@index([tripId])
+  @@index([expiresAt])
+}
+
+model SmsOutbox {
+  id        String   @id @default(uuid())
+  toPhone   String
+  body      String
+  tripId    String?
+  createdAt DateTime @default(now())
+
+  @@index([tripId, createdAt])
+}
+
+model AuditLog {
+  id       String   @id @default(uuid())
+  userId   String?
+  action   String
+  entity   String
+  entityId String
+  at       DateTime @default(now())
+  user     User?    @relation(fields: [userId], references: [id])
+
+  @@index([userId, at])
+  @@index([entity, entityId])
+}
