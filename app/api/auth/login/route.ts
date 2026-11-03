@@ -1,5 +1,4 @@
 import bcrypt from "bcryptjs";
-import { timingSafeEqual } from "node:crypto";
 import { cookies } from "next/headers";
 import { prisma } from "@/src/lib/prisma";
 import {
@@ -46,10 +45,12 @@ export async function POST(request: Request) {
     parsed.data.role === "DRIVER"
       ? normalizePhone(parsed.data.phone)
       : parsed.data.email;
+
   const rateLimit = consumeLoginAttempts([
     `ip:${getClientIp(request)}`,
     `account:${identity}`,
   ]);
+
   if (!rateLimit.allowed) {
     return Response.json(
       { error: "Too many login attempts. Try again later.", code: "rate_limited" },
@@ -65,22 +66,13 @@ export async function POST(request: Request) {
       where: { phone: identity },
       select: { id: true, role: true, pinHash: true },
     });
+
     if (!user || user.role !== parsed.data.role) return invalidCredentials();
 
     const matchesHash = user.pinHash
       ? await bcrypt.compare(parsed.data.pin, user.pinHash)
       : false;
-    const demoCode = process.env.OTP_DEMO_CODE;
-    if (demoCode && !/^[0-9]{4}$/.test(demoCode)) {
-      throw new Error("OTP_DEMO_CODE must contain exactly four digits.");
-    }
-    const inputPin = Buffer.from(parsed.data.pin);
-    const expectedPin = demoCode ? Buffer.from(demoCode) : null;
-    const matchesDemoCode =
-      expectedPin !== null &&
-      inputPin.length === expectedPin.length &&
-      timingSafeEqual(inputPin, expectedPin);
-    if (!matchesHash && !matchesDemoCode) return invalidCredentials();
+    if (!matchesHash) return invalidCredentials();
 
     const token = await createSessionToken(user.id, user.role);
     const cookieStore = await cookies();
