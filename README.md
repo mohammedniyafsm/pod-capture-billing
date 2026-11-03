@@ -20,6 +20,20 @@ You can start editing the page by modifying `app/page.tsx`. The page auto-update
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
+## Database setup
+
+Copy `.env.example` to `.env` and set `DATABASE_URL` to a Neon PostgreSQL connection string. Then run:
+
+```bash
+pnpm db:generate
+pnpm db:push
+pnpm db:seed
+```
+
+The seed is safe to rerun and contains fictional demo data only.
+
+For authentication, set `SESSION_SECRET` to a random value of at least 32 characters, `OTP_DEMO_CODE` to an optional four-digit driver demo PIN, and `BILLING_DEMO_PASSWORD` to a billing executive demo password before running `pnpm db:seed`. Driver and billing credentials are stored as bcrypt hashes. Login is limited to five attempts per 15-minute window per IP and account per server instance.
+
 ## Learn More
 
 To learn more about Next.js, take a look at the following resources:
