@@ -26,6 +26,7 @@ export async function POST(
     auth.session.userId,
     "start",
   );
+  
   if (!result.ok) {
     return Response.json(
       {
