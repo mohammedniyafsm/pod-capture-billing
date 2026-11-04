@@ -20,6 +20,7 @@ enum BillingCycle {
 
 enum TripStatus {
   ASSIGNED
+  IN_TRANSIT
   POD_PENDING
   AI_CHECKING
   RETAKE_REQUESTED
@@ -118,6 +119,7 @@ model Trip {
   expectedQuantity   Decimal     @db.Decimal(10, 2)
   quantityUnit       String
   deliveredQuantity  Decimal?    @db.Decimal(10, 2)
+  startedAt          DateTime?
   deliveredAt        DateTime?
   podReceivedAt      DateTime?
   verifiedAt         DateTime?
@@ -150,18 +152,23 @@ model Trip {
 }
 
 model PodSubmission {
-  id         String               @id
-  tripId     String
-  attemptNo  Int
-  imageKey   String
-  sizeKb     Int
-  gpsLat     Float?
-  gpsLng     Float?
-  capturedAt DateTime
-  uploadedAt DateTime             @default(now())
-  status     PodSubmissionStatus
-  trip       Trip                 @relation(fields: [tripId], references: [id])
-  extraction PodExtraction?
+  id                 String               @id
+  clientSubmissionId String?              @unique
+  uploadLinkId       String?              @unique
+  tripId             String
+  attemptNo          Int
+  imageKey           String
+  sizeKb             Int
+  gpsLat             Float?
+  gpsLng             Float?
+  capturedAt         DateTime
+  uploadedAt         DateTime             @default(now())
+  status             PodSubmissionStatus
+  retakeReason       String?
+  attemptsLeft       Int?
+  uploadLink         UploadLink?           @relation(fields: [uploadLinkId], references: [id])
+  trip               Trip                 @relation(fields: [tripId], references: [id])
+  extraction         PodExtraction?
 
   @@unique([tripId, attemptNo])
   @@index([tripId, uploadedAt])
@@ -214,6 +221,7 @@ model UploadLink {
   expiresAt DateTime
   usedAt    DateTime?
   trip      Trip     @relation(fields: [tripId], references: [id])
+  submission PodSubmission?
 
   @@index([tripId])
   @@index([expiresAt])
