@@ -14,6 +14,7 @@ export async function GET(request: Request) {
       status: {
         in: [
           TripStatus.ASSIGNED,
+          TripStatus.IN_TRANSIT,
           TripStatus.POD_PENDING,
           TripStatus.RETAKE_REQUESTED,
         ],
@@ -32,6 +33,8 @@ export async function GET(request: Request) {
       status: true,
       statusReason: true,
       retakeCount: true,
+      startedAt: true,
+      deliveredAt: true,
       createdAt: true,
       client: { select: { name: true } },
     },
