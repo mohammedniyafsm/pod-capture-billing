@@ -14,7 +14,9 @@
   },
   "dependencies": {
     "@prisma/client": "^6.19.0",
+    "@vercel/blob": "^2.8.2",
     "bcryptjs": "^3.0.3",
+    "fflate": "^0.8.3",
     "jose": "^6.2.15",
     "next": "16.4.3",
     "react": "19.3.0",
