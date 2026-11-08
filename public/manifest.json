@@ -4,8 +4,8 @@
   "description": "Proof of delivery capture and billing workflow for transport operations.",
   "start_url": "/driver",
   "display": "standalone",
-  "background_color": "#0f172a",
-  "theme_color": "#0f172a",
+  "background_color": "#0B4044",
+  "theme_color": "#0B4044",
   "orientation": "portrait",
   "icons": [
     {

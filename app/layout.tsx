@@ -14,11 +14,11 @@ const geistMono = Geist_Mono({
 });
 
 export const viewport: Viewport = {
-  themeColor: "#0f172a",
+  themeColor: "#0B4044",
 };
 
 export const metadata: Metadata = {
-  title: "FleetProof",
+  title: "Haulmark",
   description: "Proof of delivery capture and billing workflow for transport operations.",
   manifest: "/manifest.json",
   icons: {

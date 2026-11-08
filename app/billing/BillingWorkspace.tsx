@@ -53,10 +53,10 @@ function CloseIcon() {
 
 function Brand() {
   return (
-    <Link href="/billing" className="billing-brand" aria-label="FleetProof overview">
-      <span className="billing-brand-mark" aria-hidden="true">F</span>
+    <Link href="/billing" className="billing-brand" aria-label="Haulmark overview">
+      <span className="billing-brand-mark" aria-hidden="true">H</span>
       <span>
-        <span className="billing-brand-name">FleetProof</span>
+        <span className="billing-brand-name">Haulmark</span>
         <span className="billing-brand-caption">Operations</span>
       </span>
     </Link>

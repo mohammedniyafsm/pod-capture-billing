@@ -47,6 +47,7 @@ html {
 
 * {
   box-sizing: border-box;
+  caret-color: transparent;
 }
 
 body {
@@ -55,6 +56,16 @@ body {
   background: var(--fp-canvas);
   color: var(--fp-text);
   font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+input,
+textarea,
+[contenteditable="true"] {
+  caret-color: auto;
+  -webkit-user-select: text;
+  user-select: text;
 }
 
 button,

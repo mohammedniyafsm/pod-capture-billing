@@ -43,6 +43,7 @@ export interface PendingPodRecord {
 export interface CachedDriverTrip {
   id: string;
   tripCode: string;
+  vehicleNo?: string;
   origin: string;
   destination: string;
   client?: { name: string } | null;

@@ -27,6 +27,7 @@ export async function GET(request: Request) {
     select: {
       id: true,
       tripCode: true,
+      vehicleNo: true,
       origin: true,
       destination: true,
       lrNumber: true,

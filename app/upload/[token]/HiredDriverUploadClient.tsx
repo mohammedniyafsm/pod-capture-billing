@@ -248,7 +248,7 @@ export default function HiredDriverUploadClient({ token }: { token: string }) {
           </p>
         </div>
         <div className="mt-6 text-center text-[11px] text-neutral-400">
-          FleetProof Logistics Management
+          Haulmark Logistics Management
         </div>
       </div>
     );
@@ -301,7 +301,7 @@ export default function HiredDriverUploadClient({ token }: { token: string }) {
             </div>
           )}
           <div className="pt-2">
-            <p className="text-[11px] text-neutral-400">FleetProof Digital Logistics Management</p>
+            <p className="text-[11px] text-neutral-400">Haulmark Digital Logistics Management</p>
           </div>
         </div>
       </div>
@@ -315,10 +315,10 @@ export default function HiredDriverUploadClient({ token }: { token: string }) {
         {/* Header */}
         <div className="flex items-center justify-between pb-3 border-b border-neutral-200">
           <div className="flex items-center gap-2.5">
-            <span className="fp-brand-mark">FP</span>
+            <span className="fp-brand-mark bg-[#0B4044]">H</span>
             <div>
-              <span className="text-[10px] font-bold tracking-wider uppercase text-blue-600 block leading-none">
-                FleetProof
+              <span className="text-[10px] font-bold tracking-wider uppercase text-[#0B4044] block leading-none">
+                Haulmark
               </span>
               <h1 className="text-base font-bold text-neutral-900 leading-tight">Proof of Delivery</h1>
             </div>
@@ -451,7 +451,7 @@ export default function HiredDriverUploadClient({ token }: { token: string }) {
       </div>
 
       <div className="py-4 text-center text-[10px] text-neutral-400">
-        FleetProof Logistics Platform • Secure Driver Upload
+        Haulmark Logistics Platform • Secure Driver Upload
       </div>
     </div>
   );
