@@ -6,21 +6,28 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
+    "worker:dev": "tsx worker/index.ts",
+    "worker:start": "node worker-dist/worker/index.js",
+    "worker:build": "tsc -p worker/tsconfig.json",
     "lint": "eslint",
     "test": "vitest run",
     "db:generate": "prisma generate",
     "db:push": "prisma db push",
-    "db:seed": "prisma db seed"
+    "db:seed": "prisma db seed",
+    "db:seed:history": "tsx prisma/seed-history.ts"
   },
   "dependencies": {
     "@prisma/client": "^6.19.0",
     "@vercel/blob": "^2.8.2",
+    "bullmq": "^5.58.5",
     "bcryptjs": "^3.0.3",
     "fflate": "^0.8.3",
     "jose": "^6.2.15",
+    "ioredis": "^5.7.0",
     "next": "16.4.3",
     "react": "19.3.0",
     "react-dom": "19.3.0",
+    "recharts": "3.3.0",
     "zod": "^4.6.7"
   },
   "devDependencies": {

@@ -7,7 +7,6 @@ import {
   PermanentPodVerificationError,
   processPodVerification,
 } from "./pods/verification";
-import { dispatchPendingOutbox } from "./lib/outbox";
 
 type VerificationJob = { submissionId: string };
 const queueName = process.env.POD_VERIFICATION_QUEUE ?? "pod-verification";
@@ -111,36 +110,12 @@ worker.on("error", (error) => {
   console.error("POD worker error.", { errorType: error.name });
 });
 
-const pollIntervalMs = positiveInteger(process.env.OUTBOX_POLL_INTERVAL_MS, 2_000);
-let dispatching = false;
-
-const dispatchTimer = setInterval(() => {
-  if (dispatching) return;
-  dispatching = true;
-  void dispatchPendingOutbox(queue)
-    .catch((error: unknown) => {
-      console.error("POD outbox scan failed.", {
-        errorType: error instanceof Error ? error.name : "UnknownError",
-      });
-    })
-    .finally(() => {
-      dispatching = false;
-    });
-}, pollIntervalMs);
-
-void dispatchPendingOutbox(queue).catch((error: unknown) => {
-  console.error("Initial POD outbox scan failed.", {
-    errorType: error instanceof Error ? error.name : "UnknownError",
-  });
-});
-
 logPodEvent("worker.started", {
   queueName,
   concurrency: positiveInteger(process.env.POD_WORKER_CONCURRENCY, 4),
 });
 
 async function shutdown(signal: string) {
-  clearInterval(dispatchTimer);
   logPodEvent("worker.shutdown_started", { signal });
   await Promise.all([worker.close(), queue.close()]);
   await Promise.all([queueConnection.quit(), workerConnection.quit()]);

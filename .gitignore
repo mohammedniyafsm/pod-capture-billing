@@ -12,6 +12,8 @@
 
 # testing
 /coverage
+/.local-private-pods
+/.local-private-exports
 
 # next.js
 /.next/
@@ -19,6 +21,7 @@
 
 # production
 /build
+/worker-dist/
 
 # misc
 .DS_Store
