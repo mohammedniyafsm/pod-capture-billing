@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { logPodEvent } from "./podLogger";
+import { logPodEvent } from "../common/podLogger";
 
 export const MAX_POD_IMAGE_BYTES = 1024 * 1024;
 const MAX_MULTIPART_BYTES = 1100 * 1024;

@@ -1,5 +1,5 @@
 import { TripStatus } from "@prisma/client";
-import { prisma } from "../prisma";
+import { prisma } from "../../prisma";
 
 export type DriverTripTransition = "start" | "complete";
 

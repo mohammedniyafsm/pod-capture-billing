@@ -1,5 +1,5 @@
 import { UserRole } from "@prisma/client";
-import { getSessionTokenFromRequest, verifySessionToken } from "./session";
+import { getSessionTokenFromRequest, verifySessionToken } from "../session/session";
 
 type GuardSuccess = {
   ok: true;

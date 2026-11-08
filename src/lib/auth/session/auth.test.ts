@@ -3,18 +3,18 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   consumeLoginAttempts,
   LOGIN_RATE_LIMIT,
-} from "./loginRateLimit";
+} from "../rateLimit/loginRateLimit";
 import {
   requireDriverTripAccess,
   requireRole,
   requireTripReadAccess,
-} from "./requireRole";
+} from "../rbac/requireRole";
 import {
   createSessionToken,
   SESSION_DURATION_SECONDS,
   verifySessionToken,
 } from "./session";
-import { loginSchema } from "./validation";
+import { loginSchema } from "../validation/validation";
 
 afterEach(() => {
   vi.unstubAllEnvs();
@@ -89,7 +89,11 @@ describe("session token and role guard", () => {
 
     expect((await requireDriverTripAccess(request, "driver-1")).ok).toBe(true);
     expect((await requireDriverTripAccess(request, null)).ok).toBe(false);
-    expect((await requireTripReadAccess(request, "driver-2")).ok).toBe(false);
+    const anotherDriversTrip = await requireTripReadAccess(request, "driver-2");
+    expect(anotherDriversTrip.ok).toBe(false);
+    if (!anotherDriversTrip.ok) {
+      expect(anotherDriversTrip.response.status).toBe(403);
+    }
 
     const execToken = await createSessionToken("exec-1", UserRole.BILLING_EXEC);
     const execRequest = new Request("http://localhost/api/test", {
