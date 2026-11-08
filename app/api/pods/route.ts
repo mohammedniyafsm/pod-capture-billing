@@ -1,8 +1,8 @@
 import { UserRole } from "@prisma/client";
-import { requireRole } from "@/src/lib/auth/requireRole";
-import { CaptureError, processPodCapture } from "@/src/lib/pods/capture";
-import { logPodEvent } from "@/src/lib/pods/podLogger";
-import { parsePodUploadRequest } from "@/src/lib/pods/uploadValidation";
+import { requireRole } from "@/src/lib/auth/rbac/requireRole";
+import { CaptureError, processPodCapture } from "@/src/lib/pods/capture/capture";
+import { logPodEvent } from "@/src/lib/pods/common/podLogger";
+import { parsePodUploadRequest } from "@/src/lib/pods/validation/uploadValidation";
 
 export const maxDuration = 60;
 
@@ -43,18 +43,32 @@ export async function POST(request: Request) {
     imageSizeBytes: parsed.data.imageBytes.byteLength,
     detectedMimeType: parsed.data.mediaType,
   });
+
   try {
     const result = await processPodCapture(parsed.data, {
       userId: auth.session.userId,
     });
+
     logPodEvent("route.response_sent", {
       clientSubmissionId: parsed.data.clientSubmissionId,
       tripId: parsed.data.tripId,
-      httpStatus: 200,
-      verdict: result.verdict,
+      submissionId: result.submissionId,
+      httpStatus: 202,
+      status: result.status,
+      enqueued: result.enqueued,
       durationMs: Date.now() - requestStartedAt,
     });
-    return Response.json(result);
+
+    return Response.json(
+      {
+        success: true,
+        message: result.enqueued === false
+          ? "POD uploaded. Verification queuing delayed; status will be available shortly."
+          : "POD uploaded. Verification is in progress.",
+        data: result,
+      },
+      { status: 202 },
+    );
   } catch (error) {
     if (error instanceof CaptureError) {
       logPodEvent(

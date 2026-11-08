@@ -1,6 +1,6 @@
 import { prisma } from "@/src/lib/prisma";
-import { requireTripReadAccess } from "@/src/lib/auth/requireRole";
-import { createPodImageToken, POD_IMAGE_URL_TTL_SECONDS } from "@/src/lib/pods/imageUrl";
+import { requireTripReadAccess } from "@/src/lib/auth/rbac/requireRole";
+import { createPodImageToken, POD_IMAGE_URL_TTL_SECONDS } from "@/src/lib/pods/storage/imageUrl";
 
 export async function GET(
   request: Request,

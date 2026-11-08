@@ -11,7 +11,7 @@ const mocks = vi.hoisted(() => {
   };
 });
 
-vi.mock("@/src/lib/auth/requireRole", () => ({
+vi.mock("@/src/lib/auth/rbac/requireRole", () => ({
   requireRole: mocks.requireRole,
 }));
 

@@ -1,7 +1,7 @@
 import { UserRole } from "@prisma/client";
 import { z } from "zod";
-import { requireRole } from "@/src/lib/auth/requireRole";
-import { createPodImageToken, POD_IMAGE_URL_TTL_SECONDS } from "@/src/lib/pods/imageUrl";
+import { requireRole } from "@/src/lib/auth/rbac/requireRole";
+import { createPodImageToken, POD_IMAGE_URL_TTL_SECONDS } from "@/src/lib/pods/storage/imageUrl";
 import { prisma } from "@/src/lib/prisma";
 
 const requireBilling = requireRole(UserRole.BILLING_EXEC);
@@ -79,6 +79,7 @@ export async function GET(
     trip: {
       ...trip,
       consigneePhone: unmask ? trip.consigneePhone : maskPhone(trip.consigneePhone),
+      driverPhone: unmask ? trip.driverPhone : maskPhone(trip.driverPhone),
       driver: trip.driver
         ? { ...trip.driver, phone: unmask ? trip.driver.phone : maskPhone(trip.driver.phone) }
         : null,

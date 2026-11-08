@@ -1,6 +1,6 @@
 import { prisma } from "@/src/lib/prisma";
-import { verifyPodImageToken } from "@/src/lib/pods/imageUrl";
-import { getPodImageStorage } from "@/src/lib/pods/imageStorage";
+import { verifyPodImageToken } from "@/src/lib/pods/storage/imageUrl";
+import { getPodImageStorage } from "@/src/lib/pods/storage/imageStorage";
 
 export async function GET(
   request: Request,

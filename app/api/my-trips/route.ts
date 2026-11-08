@@ -1,5 +1,5 @@
 import { TripStatus, UserRole } from "@prisma/client";
-import { requireRole } from "@/src/lib/auth/requireRole";
+import { requireRole } from "@/src/lib/auth/rbac/requireRole";
 import { prisma } from "@/src/lib/prisma";
 
 const requireDriver = requireRole(UserRole.DRIVER);
