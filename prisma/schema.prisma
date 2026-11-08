@@ -38,6 +38,7 @@ enum PodSubmissionStatus {
   VERIFIED
   RETAKE
   REVIEW
+  FAILED
 }
 
 enum Verdict {
@@ -158,6 +159,7 @@ model PodSubmission {
   tripId             String
   attemptNo          Int
   imageKey           String
+  sourceFilename     String               @default("")
   sizeKb             Int
   gpsLat             Float?
   gpsLng             Float?
@@ -165,6 +167,7 @@ model PodSubmission {
   uploadedAt         DateTime             @default(now())
   status             PodSubmissionStatus
   retakeReason       String?
+  processingError    String?
   attemptsLeft       Int?
   uploadLink         UploadLink?           @relation(fields: [uploadLinkId], references: [id])
   trip               Trip                 @relation(fields: [tripId], references: [id])
