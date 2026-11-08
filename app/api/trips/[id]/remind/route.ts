@@ -1,6 +1,6 @@
 import { UserRole } from "@prisma/client";
 import { z } from "zod";
-import { requireRole } from "@/src/lib/auth/requireRole";
+import { requireRole } from "@/src/lib/auth/rbac/requireRole";
 import { prisma } from "@/src/lib/prisma";
 
 const requireTripUser = requireRole([UserRole.DRIVER, UserRole.BILLING_EXEC]);

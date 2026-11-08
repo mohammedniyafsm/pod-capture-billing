@@ -1,6 +1,6 @@
 import { UserRole } from "@prisma/client";
 import { z } from "zod";
-import { requireRole } from "@/src/lib/auth/requireRole";
+import { requireRole } from "@/src/lib/auth/rbac/requireRole";
 import { prisma } from "../../../src/lib/prisma";
 
 const requireBilling = requireRole(UserRole.BILLING_EXEC);
@@ -159,6 +159,7 @@ export async function GET(request: Request) {
       branch: trip.branch,
       vehicle: trip.vehicle,
       driver: trip.driver,
+      driverPhone: trip.driverPhone,
       latestPod: trip.podSubmissions[0] ?? null,
       latestUploadLink: trip.uploadLinks[0] ?? null,
     })),

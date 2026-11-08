@@ -1,7 +1,7 @@
 import { UserRole } from "@prisma/client";
 import { z } from "zod";
-import { requireRole } from "@/src/lib/auth/requireRole";
-import { transitionDriverTrip } from "@/src/lib/trips/driverLifecycle";
+import { requireRole } from "@/src/lib/auth/rbac/requireRole";
+import { transitionDriverTrip } from "@/src/lib/trips/lifecycle/driverLifecycle";
 
 const requireDriver = requireRole(UserRole.DRIVER);
 const tripIdSchema = z.uuid();

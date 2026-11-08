@@ -16,7 +16,7 @@ const mocks = vi.hoisted(() => {
   };
 });
 
-vi.mock("@/src/lib/auth/requireRole", () => ({
+vi.mock("@/src/lib/auth/rbac/requireRole", () => ({
   requireRole: mocks.requireRole,
 }));
 
@@ -36,7 +36,7 @@ vi.mock("../../../../../../src/lib/prisma", () => ({
   prisma: mocks.prisma,
 }));
 
-vi.mock("../../../../src/lib/pods/imageUrl", () => ({
+vi.mock("../../../../src/lib/pods/storage/imageUrl", () => ({
   createPodImageToken: vi.fn(() => Promise.resolve("mock-token")),
   POD_IMAGE_URL_TTL_SECONDS: 3600,
 }));
