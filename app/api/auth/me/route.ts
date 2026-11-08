@@ -1,11 +1,11 @@
 import { UserRole } from "@prisma/client";
 import { cookies } from "next/headers";
 import { prisma } from "@/src/lib/prisma";
-import { requireRole } from "@/src/lib/auth/requireRole";
+import { requireRole } from "@/src/lib/auth/rbac/requireRole";
 import {
   SESSION_COOKIE_NAME,
   sessionCookieOptions,
-} from "@/src/lib/auth/session";
+} from "@/src/lib/auth/session/session";
 
 const requireAnyRole = requireRole([
   UserRole.DRIVER,

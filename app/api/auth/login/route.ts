@@ -4,13 +4,13 @@ import { prisma } from "@/src/lib/prisma";
 import {
   consumeLoginAttempts,
   getClientIp,
-} from "@/src/lib/auth/loginRateLimit";
+} from "@/src/lib/auth/rateLimit/loginRateLimit";
 import {
   createSessionToken,
   SESSION_COOKIE_NAME,
   sessionCookieOptions,
-} from "@/src/lib/auth/session";
-import { loginSchema, normalizePhone } from "@/src/lib/auth/validation";
+} from "@/src/lib/auth/session/session";
+import { loginSchema, normalizePhone } from "@/src/lib/auth/validation/validation";
 
 const invalidCredentials = () =>
   Response.json(

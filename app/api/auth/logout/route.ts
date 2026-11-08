@@ -1,9 +1,9 @@
 import { cookies } from "next/headers";
-import { requireRole } from "@/src/lib/auth/requireRole";
+import { requireRole } from "@/src/lib/auth/rbac/requireRole";
 import {
   SESSION_COOKIE_NAME,
   sessionCookieOptions,
-} from "@/src/lib/auth/session";
+} from "@/src/lib/auth/session/session";
 import { UserRole } from "@prisma/client";
 
 const requireAnyRole = requireRole([
