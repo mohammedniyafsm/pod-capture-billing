@@ -16,7 +16,10 @@ export async function GET(request: Request) {
           TripStatus.ASSIGNED,
           TripStatus.IN_TRANSIT,
           TripStatus.POD_PENDING,
+          TripStatus.AI_CHECKING,
           TripStatus.RETAKE_REQUESTED,
+          TripStatus.NEEDS_REVIEW,
+          TripStatus.VERIFIED,
         ],
       },
     },
@@ -37,6 +40,16 @@ export async function GET(request: Request) {
       deliveredAt: true,
       createdAt: true,
       client: { select: { name: true } },
+      podSubmissions: {
+        orderBy: { attemptNo: "desc" },
+        take: 1,
+        select: {
+          id: true,
+          status: true,
+          retakeReason: true,
+          attemptsLeft: true,
+        },
+      },
     },
   });
 
