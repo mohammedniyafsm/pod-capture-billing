@@ -125,6 +125,23 @@ const editableLabels: Record<EditableField, string> = {
 const editableFields = Object.keys(editableLabels) as EditableField[];
 const editableFieldSet: ReadonlySet<string> = new Set(editableFields);
 
+function extractFieldValue(val: unknown): unknown {
+  if (val !== null && typeof val === "object") {
+    const obj = val as Record<string, unknown>;
+    if ("value" in obj) return obj.value;
+    if ("present" in obj) return obj.present;
+  }
+  return val;
+}
+
+function extractFieldUnit(val: unknown): string | null {
+  if (val !== null && typeof val === "object") {
+    const obj = val as Record<string, unknown>;
+    if (typeof obj.unit === "string") return obj.unit;
+  }
+  return null;
+}
+
 function displayReason(reason: string) {
   return reason.replaceAll("_", " ");
 }
@@ -137,9 +154,25 @@ function confidencePresentation(value: number) {
 }
 
 function correctedFields(detail: ReviewDetail) {
-  const fields = {
-    ...(detail.trip.podSubmissions.at(-1)?.extraction?.fields ?? {}),
-  };
+  const rawFields = detail.trip.podSubmissions.at(-1)?.extraction?.fields ?? {};
+  const fields: Record<string, unknown> = {};
+
+  for (const [key, val] of Object.entries(rawFields)) {
+    if (key === "consignee_stamp") {
+      fields.consignee_stamp_present = extractFieldValue(val);
+    } else if (key === "signature") {
+      fields.signature_present = extractFieldValue(val);
+    } else if (key === "quantity_received") {
+      fields.quantity_received = extractFieldValue(val);
+      const unit = extractFieldUnit(val);
+      if (unit && !rawFields.quantity_unit) {
+        fields.quantity_unit = unit;
+      }
+    } else {
+      fields[key] = extractFieldValue(val);
+    }
+  }
+
   for (const action of detail.history) {
     if (action.action !== "CORRECT_FIELDS") continue;
     for (const [field, change] of Object.entries(action.fieldChanges)) {
@@ -952,12 +985,28 @@ export default function ReviewPage({
                         ["quantity_unit", "Quantity Unit"],
                         ["goods_description", "Goods Description"],
                       ].map(([field, label]) => {
-                        const value = extraction?.fields[field];
+                        const rawValue =
+                          extraction?.fields[field] ??
+                          (field === "consignee_stamp_present"
+                            ? extraction?.fields.consignee_stamp
+                            : field === "signature_present"
+                            ? extraction?.fields.signature
+                            : field === "quantity_unit"
+                            ? extractFieldUnit(extraction?.fields.quantity_received)
+                            : undefined);
+
+                        const value = extractFieldValue(rawValue);
                         const reviewedValue = reviewedFields?.[field];
                         const isCorrected =
                           reviewedValue !== undefined &&
                           reviewedValue !== value;
-                        const confidence = extraction?.confidences[field];
+                        const confidence =
+                          extraction?.confidences[field] ??
+                          (field === "consignee_stamp_present"
+                            ? extraction?.confidences.consignee_stamp
+                            : field === "signature_present"
+                            ? extraction?.confidences.signature
+                            : undefined);
                         const confidenceInfo =
                           typeof confidence === "number"
                             ? confidencePresentation(confidence)
@@ -1158,7 +1207,7 @@ export default function ReviewPage({
                               <td><strong className="text-neutral-900">LR Number</strong></td>
                               <td>
                                 <span className="font-mono">
-                                  {extraction?.fields.lr_number ? String(extraction.fields.lr_number) : "Not detected"}
+                                  {extractFieldValue(extraction?.fields.lr_number) ? String(extractFieldValue(extraction?.fields.lr_number)) : "Not detected"}
                                 </span>
                               </td>
                               <td><span className="font-mono">{activeDetail.trip.lrNumber}</span></td>
@@ -1167,8 +1216,8 @@ export default function ReviewPage({
                               <td><strong className="text-neutral-900">Quantity</strong></td>
                               <td>
                                 <span>
-                                  {extraction?.fields.quantity_received !== undefined && extraction?.fields.quantity_received !== null
-                                    ? `${extraction.fields.quantity_received} ${extraction.fields.quantity_unit ?? ""}`
+                                  {extractFieldValue(extraction?.fields.quantity_received) !== undefined && extractFieldValue(extraction?.fields.quantity_received) !== null
+                                    ? `${extractFieldValue(extraction?.fields.quantity_received)} ${extractFieldValue(extraction?.fields.quantity_unit) ?? extractFieldUnit(extraction?.fields.quantity_received) ?? ""}`
                                     : "Not detected"}
                                 </span>
                               </td>
@@ -1182,8 +1231,8 @@ export default function ReviewPage({
                               <td><strong className="text-neutral-900">Delivered Quantity</strong></td>
                               <td>
                                 <span className="text-neutral-600">
-                                  {extraction?.fields.quantity_received !== undefined && extraction?.fields.quantity_received !== null
-                                    ? `${extraction.fields.quantity_received} (Extracted - unconfirmed)`
+                                  {extractFieldValue(extraction?.fields.quantity_received) !== undefined && extractFieldValue(extraction?.fields.quantity_received) !== null
+                                    ? `${extractFieldValue(extraction?.fields.quantity_received)} (Extracted - unconfirmed)`
                                     : "Not detected"}
                                 </span>
                               </td>
@@ -1197,7 +1246,7 @@ export default function ReviewPage({
                             </tr>
                             <tr>
                               <td><strong className="text-neutral-900">Goods Description</strong></td>
-                              <td><span>{extraction?.fields.goods_description ? String(extraction.fields.goods_description) : "Not detected"}</span></td>
+                              <td><span>{extractFieldValue(extraction?.fields.goods_description) ? String(extractFieldValue(extraction?.fields.goods_description)) : "Not detected"}</span></td>
                               <td><span>{activeDetail.trip.goodsDescription}</span></td>
                             </tr>
                             <tr>
