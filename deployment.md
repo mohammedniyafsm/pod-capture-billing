@@ -1,13 +1,13 @@
-# FleetProof — Deployment & Local Setup Guide
+# HaulMark — Deployment & Local Setup Guide
 
-**Project Name:** FleetProof (Road Transport Fleet POD Capture & Billing Automation)  
-**Repository:** https://github.com/mohammedniyafsm/pod-capture-billing..git  
+**Project Name:** HaulMark (Road Transport Fleet POD Capture & Billing Automation)  
+**Repository:** https://github.com/mohammedniyafsm/pod-capture-billing.git  
 
 ---
 
 ## 1. Local Setup Instructions (Step-by-Step)
 
-Follow these steps to run the complete FleetProof application, database, and background AI worker locally.
+Follow these steps to run the complete HaulMark application, database, and background AI worker locally.
 
 ### Prerequisites
 - **Node.js**: v20.x or higher (recommended: v22.x)
@@ -159,7 +159,7 @@ For spot-contracted drivers without app logins:
 
 ## 4. Production Deployment Architecture
 
-FleetProof is designed for split cloud deployment:
+HaulMark is designed for split cloud deployment:
 1. **Frontend & Next.js API**: Hosted on **Vercel** with global CDN edge caching.
 2. **Database**: Hosted on **Neon Serverless PostgreSQL** (AWS `us-east-2`) with connection pooling enabled.
 3. **Queue Broker**: Hosted on **Upstash Redis** (low-latency serverless Redis).
