@@ -20,31 +20,85 @@ You can start editing the page by modifying `app/page.tsx`. The page auto-update
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
-## Database setup
+## Database & Local Setup (For Evaluators / Reviewers)
 
-Copy `.env.example` to `.env` and set `DATABASE_URL` to a Neon PostgreSQL connection string. Then run:
+To run and evaluate this project locally with full demo and historical data:
 
-```powershell
+### 1. Prerequisites
+- **Node.js**: v20+ recommended
+- **pnpm**: `npm install -g pnpm`
+- **PostgreSQL**: Local PostgreSQL or cloud instance (e.g. [Neon](https://neon.tech))
+
+### 2. Environment Configuration
+Copy `.env.example` to `.env`:
+```bash
+cp .env.example .env
+```
+Ensure `.env` contains:
+- `DATABASE_URL` and `DIRECT_URL`: your PostgreSQL connection string
+- `SESSION_SECRET`: any 32+ character random string (e.g. `session-secret-demo-32-chars-long-fleetproof`)
+- `DEMO_DRIVER_PIN`: 4-digit PIN for demo drivers (default: `4821`)
+- `BILLING_DEMO_PASSWORD`: password for demo billing executives (default: `YourStrongDemoPassword!`)
+- `DEMO_POD_IMAGE_PATH`: `./sample-pod.jpg`
+
+### 3. Initialize Database Schema & Seed Data
+
+Run the Prisma push and seed commands:
+
+**In Bash / macOS / Linux:**
+```bash
+pnpm install
 pnpm db:generate
 pnpm db:push
+
+# Run primary seed (creates branches, clients, drivers, billing accounts, upcoming trips):
+SEED_RESET=1 pnpm db:seed
+
+# Optional: seed historical analytics & realistic branch latencies for the billing dashboard:
+SEED_HISTORY=1 pnpm db:seed:history
+```
+
+**In PowerShell (Windows):**
+```powershell
+pnpm install
+pnpm db:generate
+pnpm db:push
+
+# Run primary seed:
 $env:SEED_RESET = "1"
 pnpm db:seed
 Remove-Item Env:SEED_RESET
-```
 
-The seed requires the explicit `SEED_RESET=1` confirmation. It replaces only its managed demo trips (including their related POD/review/export records) and removes obsolete seed vehicles when unused. Other application rows, users, branches, and clients are retained. Confirm `DATABASE_URL` points to your intended development database before running it. The seed creates nine assigned trips, three per driver, and does not fabricate POD submissions, AI results, review actions, or image files. In PowerShell, clear the confirmation after seeding with `Remove-Item Env:SEED_RESET`.
-
-To add fictional historical dashboard analytics to a non-production database, run the primary seed first, then opt in explicitly:
-
-```powershell
+# Seed historical analytics & branch latency data:
 $env:SEED_HISTORY = "1"
 pnpm db:seed:history
 Remove-Item Env:SEED_HISTORY
 ```
 
-This adds up to 180 trips with `HIST-` identifiers and historical delivery, POD, verification, and invoice timestamps. It is not run by `pnpm db:seed` and is rejected in production. It creates no POD image, AI extraction, review action, or export artifact. Re-running it skips existing history trip codes.
+### 4. Demo Login Credentials
 
-For authentication, set `SESSION_SECRET` to a random value of at least 32 characters and set `DRIVER_RAMESH_PIN`, `DRIVER_SUNIL_PIN`, and `DRIVER_DATTU_PIN` to individual four-digit PINs before running `pnpm db:seed`. The seed stores each driver PIN as a bcrypt hash; it never stores the plaintext PIN. Set `BILLING_DEMO_PASSWORD` to configure the billing executive's password, which is also stored as a bcrypt hash. Keep these values private and out of source control. Login is limited to five attempts per 15-minute window per IP and account per server instance.
+Once seeded, you can sign in to the application at `http://localhost:3000`:
+
+| Role | Username / Identifier | Password / PIN | Description |
+|---|---|---|---|
+| **Billing Executive** | `meena.kulkarni@example.test` | `YourStrongDemoPassword!` | Full access to `/billing` (Queue, Trips, Overview, Daily CSV Import) |
+| **Billing Executive** | `amit.joshi@example.test` | `YourStrongDemoPassword!` | Secondary billing user |
+| **Driver (Marathi)** | Phone: `9000000001` | PIN: `4821` | Ramesh Pawar (Driver POD upload & audio instructions) |
+| **Driver (Hindi)** | Phone: `9000000002` | PIN: `4821` | Sunil Yadav (Driver POD upload & audio instructions) |
+| **Driver (Marathi)** | Phone: `9000000003` | PIN: `4821` | Dattu Shinde |
+
+### 5. Start Development Server
+
+```bash
+pnpm dev
+```
+Open `http://localhost:3000` in your browser.
+
+- **Billing Dashboard**: `http://localhost:3000/billing`
+- **Billing Queue**: `http://localhost:3000/billing/queue`
+- **Trip Import**: `http://localhost:3000/billing/import` (sample CSV available at `public/sample_10_trips_import.csv` or downloadable directly on the page)
+- **Driver Capture / Hired Upload**: Upload links under `/upload/[token]` with Hindi/Marathi audio playback and offline capture.
+
 
 ### Test driver login in Postman
 
