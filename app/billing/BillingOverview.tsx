@@ -96,35 +96,52 @@ const rangeOptions: Array<{ value: DashboardRange; label: string }> = [
   { value: "6m", label: "Last 6 months" },
   { value: "12m", label: "Last 12 months" },
 ];
-const statusOrder = [
+const activeStatusOrder = [
   "ASSIGNED",
   "IN_TRANSIT",
   "POD_PENDING",
   "AI_CHECKING",
   "RETAKE_REQUESTED",
   "NEEDS_REVIEW",
-  "VERIFIED",
   "DISPUTED",
+];
+
+const completedStatusOrder = [
+  "VERIFIED",
   "EXPORTED",
   "INVOICED",
-  "UNASSIGNED",
 ];
+
 const statusColors: Record<string, string> = {
-  ASSIGNED: "#737373",
-  IN_TRANSIT: "#2563eb",
-  POD_PENDING: "#d97706",
-  AI_CHECKING: "#7c3aed",
-  RETAKE_REQUESTED: "#ea580c",
-  NEEDS_REVIEW: "#dc2626",
-  VERIFIED: "#16a34a",
-  DISPUTED: "#991b1b",
-  EXPORTED: "#64748b",
-  INVOICED: "#0f766e",
-  UNASSIGNED: "#a3a3a3",
+  ASSIGNED: "#cfd6d9",
+  IN_TRANSIT: "#cfd6d9",
+  POD_PENDING: "#cfd6d9",
+  AI_CHECKING: "#cfd6d9",
+  UNASSIGNED: "#cfd6d9",
+  RETAKE_REQUESTED: "#d97706",
+  NEEDS_REVIEW: "#d97706",
+  DISPUTED: "#b42318",
+  VERIFIED: "#15803d",
+  EXPORTED: "#0B4044",
+  INVOICED: "#0B4044",
+};
+
+const statusDisplayNames: Record<string, string> = {
+  ASSIGNED: "Assigned",
+  IN_TRANSIT: "In transit",
+  POD_PENDING: "POD pending",
+  AI_CHECKING: "AI checking",
+  RETAKE_REQUESTED: "Retake requested",
+  NEEDS_REVIEW: "Needs review",
+  DISPUTED: "Disputed",
+  VERIFIED: "Verified",
+  EXPORTED: "Exported",
+  INVOICED: "Invoiced",
+  UNASSIGNED: "Unassigned",
 };
 
 function formatStatus(status: string) {
-  return status.replaceAll("_", " ").toLowerCase().replace(/^\w/, (letter) => letter.toUpperCase());
+  return statusDisplayNames[status] ?? status.replaceAll("_", " ").toLowerCase().replace(/^\w/, (letter) => letter.toUpperCase());
 }
 
 function dashboardDate(value: string) {
@@ -168,26 +185,37 @@ function Metric({
   helper,
   state,
   onRetry,
+  isAccent,
+  showDot,
 }: {
   label: string;
   value: string;
   helper: string;
   state: "ready" | "loading" | "error";
   onRetry: () => void;
+  isAccent?: boolean;
+  showDot?: boolean;
 }) {
   return (
     <section className="billing-metric" aria-label={label}>
-      <div className="billing-metric-label">{label}</div>
+      <div className="billing-metric-label">
+        <span>{label}</span>
+      </div>
       {state === "loading" ? (
-        <div className="billing-skeleton-block mt-3 h-7 w-20" aria-hidden="true" />
+        <div className="billing-skeleton-block mt-3 h-8 w-24" aria-hidden="true" />
       ) : state === "error" ? (
         <button type="button" className="billing-button mt-3" onClick={onRetry}>
           Retry
         </button>
       ) : (
         <>
-          <div className="billing-metric-value">{value}</div>
-          <p className="billing-metric-helper">{helper}</p>
+          <div className={`billing-metric-value${isAccent ? " is-accent" : ""}`}>
+            {value}
+          </div>
+          <p className="billing-metric-helper">
+            {showDot ? <span className="billing-metric-dot" aria-hidden="true" /> : null}
+            {helper}
+          </p>
         </>
       )}
     </section>
@@ -331,12 +359,20 @@ export default function BillingOverview({
     0,
   );
   const statusChartData = dashboard
-    ? statusOrder.map((status) => ({
+    ? activeStatusOrder.map((status) => ({
         status: formatStatus(status),
         value: dashboard.statusCounts[status] ?? 0,
         color: statusColors[status],
       }))
     : [];
+  const completedSummaryText = dashboard
+    ? `Completed: ${completedStatusOrder
+        .map(
+          (status) =>
+            `${formatNumber(dashboard.statusCounts[status] ?? 0)} ${formatStatus(status).toLowerCase()}`,
+        )
+        .join(" · ")}`
+    : "";
   const onTimeTrend = dashboard?.series.map((bucket) => ({
     ...bucket,
     percentage:
@@ -376,6 +412,7 @@ export default function BillingOverview({
     <div className="space-y-4">
       <div className="billing-page-heading">
         <div>
+          <span className="billing-page-kicker">Operations</span>
           <h1 className="billing-page-title">Operations overview</h1>
           <p className="billing-page-description">
             Delivery, POD and billing performance across your branches.
@@ -461,7 +498,7 @@ export default function BillingOverview({
       ) : null}
 
       <div
-        className={`billing-metric-grid${dashboardState.status === "loading" || queueState.status === "loading" ? " is-refreshing" : ""}`}
+        className={`billing-metric-strip${dashboardState.status === "loading" || queueState.status === "loading" ? " is-refreshing" : ""}`}
         aria-busy={dashboardState.status === "loading" || queueState.status === "loading"}
       >
         <Metric
@@ -470,6 +507,8 @@ export default function BillingOverview({
           helper="Completed deliveries with no POD submission"
           state={dashboard ? "ready" : dashboardState.status}
           onRetry={retryDashboardData}
+          isAccent={true}
+          showDot={missingPodCount > 0}
         />
         <Metric
           label="Awaiting review"
@@ -487,7 +526,7 @@ export default function BillingOverview({
           value={formatNumber(readyCount)}
           helper={
             queue
-              ? `${formatCurrency(readyAmount)} verified freight · current`
+              ? `${formatCurrency(readyAmount).replace(/\.00$/, "")} verified freight · current`
               : "Current verified queue"
           }
           state={queue ? "ready" : queueState.status}
@@ -538,14 +577,50 @@ export default function BillingOverview({
               </p>
               <div className="billing-chart">
                 <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={onTimeTrend} margin={{ top: 8, right: 12, bottom: 0, left: -12 }}>
-                    <CartesianGrid stroke="#f0f0f0" vertical={false} />
-                    <XAxis dataKey="label" tick={{ fill: "#737373", fontSize: 10 }} tickLine={false} axisLine={false} minTickGap={18} />
-                    <YAxis domain={[0, 100]} tickFormatter={(value: number) => `${value}%`} tick={{ fill: "#737373", fontSize: 10 }} tickLine={false} axisLine={false} width={42} />
-                    <Tooltip formatter={(value) => [value === null ? "No eligible trips" : `${Number(value).toFixed(1)}%`, "Within 24h"]} contentStyle={{ border: "1px solid #e5e5e5", borderRadius: 8, fontSize: 11 }} />
-                    <Legend wrapperStyle={{ fontSize: 10 }} />
-                    <ReferenceLine y={dashboard.summary.podWithin24Hours.targetPercentage} stroke="#d97706" strokeDasharray="5 4" />
-                    <Line type="monotone" dataKey="percentage" name="Within 24h" stroke="#2563eb" strokeWidth={2} dot={false} connectNulls={false} />
+                  <LineChart data={onTimeTrend} margin={{ top: 12, right: 20, bottom: 0, left: -10 }}>
+                    <CartesianGrid stroke="#e3e6e8" strokeDasharray="3 3" vertical={false} />
+                    <XAxis dataKey="label" tick={{ fill: "#5f6b72", fontSize: 11 }} tickLine={false} axisLine={false} minTickGap={20} />
+                    <YAxis domain={[0, 100]} tickFormatter={(value: number) => `${value}%`} tick={{ fill: "#5f6b72", fontSize: 11 }} tickLine={false} axisLine={false} width={42} />
+                    <Tooltip
+                      formatter={(value, _name, props) => {
+                        const payload = (props as { payload?: { within24hCount?: number; within24hEligible?: number } })?.payload;
+                        const countText = payload && payload.within24hEligible !== undefined
+                          ? ` (${payload.within24hCount} of ${payload.within24hEligible} PODs)`
+                          : "";
+                        return [
+                          value === null ? "No eligible deliveries" : `${Number(value).toFixed(1)}%${countText}`,
+                          "Within 24h",
+                        ];
+                      }}
+                      contentStyle={{
+                        border: "1px solid #e3e6e8",
+                        borderRadius: 8,
+                        fontSize: 12,
+                        backgroundColor: "#ffffff",
+                        boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
+                      }}
+                    />
+                    <ReferenceLine
+                      y={dashboard.summary.podWithin24Hours.targetPercentage}
+                      stroke="#9aa4a9"
+                      strokeDasharray="4 4"
+                      label={{
+                        value: `Target ${dashboard.summary.podWithin24Hours.targetPercentage}%`,
+                        position: "right",
+                        fill: "#5f6b72",
+                        fontSize: 10,
+                      }}
+                    />
+                    <Line
+                      type="linear"
+                      dataKey="percentage"
+                      name="Within 24h"
+                      stroke="#0B4044"
+                      strokeWidth={2}
+                      dot={{ r: 2.5, fill: "#0B4044" }}
+                      activeDot={{ r: 4, fill: "#0B4044" }}
+                      connectNulls={false}
+                    />
                   </LineChart>
                 </ResponsiveContainer>
               </div>
@@ -556,7 +631,7 @@ export default function BillingOverview({
         <section className="billing-panel billing-chart-panel">
           <ChartHeading
             title="Trip status pipeline"
-            description="Current trip counts by lifecycle status · branch filtered"
+            description="Active lifecycle stages in progression order · branch filtered"
           />
           {!dashboard ? (
             retryDashboard(dashboardState, retryDashboardData)
@@ -564,7 +639,7 @@ export default function BillingOverview({
             <PanelStateMessage
               state={dashboardState}
               onRetry={retryDashboardData}
-              empty="No trips are recorded for this branch."
+              empty="No active trips are recorded for this branch."
             />
           ) : (
             <>
@@ -573,17 +648,48 @@ export default function BillingOverview({
               </p>
               <div className="billing-chart">
                 <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={statusChartData} layout="vertical" margin={{ top: 2, right: 14, bottom: 0, left: 4 }}>
-                    <CartesianGrid stroke="#f0f0f0" horizontal={false} />
-                    <XAxis type="number" allowDecimals={false} tick={{ fill: "#737373", fontSize: 9 }} tickLine={false} axisLine={false} />
-                    <YAxis type="category" dataKey="status" width={104} tick={{ fill: "#525252", fontSize: 9 }} tickLine={false} axisLine={false} />
-                    <Tooltip contentStyle={{ border: "1px solid #e5e5e5", borderRadius: 8, fontSize: 11 }} />
-                    <Bar dataKey="value" name="Trips" radius={[0, 4, 4, 0]}>
+                  <BarChart data={statusChartData} layout="vertical" margin={{ top: 4, right: 36, bottom: 4, left: 8 }}>
+                    <CartesianGrid stroke="#f0f2f3" horizontal={false} />
+                    <XAxis type="number" allowDecimals={false} hide={true} />
+                    <YAxis
+                      type="category"
+                      dataKey="status"
+                      width={112}
+                      tick={{ fill: "#5f6b72", fontSize: 11 }}
+                      tickLine={false}
+                      axisLine={false}
+                    />
+                    <Tooltip
+                      formatter={(val) => [val, "Trips"]}
+                      contentStyle={{
+                        border: "1px solid #e3e6e8",
+                        borderRadius: 8,
+                        fontSize: 12,
+                        backgroundColor: "#ffffff",
+                        boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
+                      }}
+                    />
+                    <Bar
+                      dataKey="value"
+                      name="Trips"
+                      radius={[0, 4, 4, 0]}
+                      label={{
+                        position: "right",
+                        fill: "#5f6b72",
+                        fontSize: 11,
+                        formatter: (val: unknown) => (Number(val) > 0 ? String(val) : ""),
+                      }}
+                    >
                       {statusChartData.map((item) => <Cell key={item.status} fill={item.color} />)}
                     </Bar>
                   </BarChart>
                 </ResponsiveContainer>
               </div>
+              {completedSummaryText ? (
+                <div className="px-5 pb-4 pt-1 text-[12px] text-[#5f6b72] border-t border-[#e3e6e8]/60 flex items-center justify-between">
+                  <span>{completedSummaryText}</span>
+                </div>
+              ) : null}
             </>
           )}
         </section>
@@ -611,14 +717,22 @@ export default function BillingOverview({
               </p>
               <div className="billing-chart">
                 <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={dashboard.series} margin={{ top: 8, right: 12, bottom: 0, left: -12 }}>
-                    <CartesianGrid stroke="#f0f0f0" vertical={false} />
-                    <XAxis dataKey="label" tick={{ fill: "#525252", fontSize: 9 }} tickLine={false} axisLine={false} minTickGap={18} />
-                    <YAxis allowDecimals={false} tick={{ fill: "#737373", fontSize: 9 }} tickLine={false} axisLine={false} width={34} />
-                    <Tooltip contentStyle={{ border: "1px solid #e5e5e5", borderRadius: 8, fontSize: 11 }} />
-                    <Legend wrapperStyle={{ fontSize: 10 }} />
-                    <Bar dataKey="delivered" name="Delivered" fill="#2563eb" radius={[4, 4, 0, 0]} />
-                    <Bar dataKey="podReceived" name="POD received" fill="#16a34a" radius={[4, 4, 0, 0]} />
+                  <BarChart data={dashboard.series} margin={{ top: 12, right: 16, bottom: 0, left: -10 }}>
+                    <CartesianGrid stroke="#e3e6e8" strokeDasharray="3 3" vertical={false} />
+                    <XAxis dataKey="label" tick={{ fill: "#5f6b72", fontSize: 11 }} tickLine={false} axisLine={false} minTickGap={20} />
+                    <YAxis allowDecimals={false} tick={{ fill: "#5f6b72", fontSize: 11 }} tickLine={false} axisLine={false} width={36} />
+                    <Tooltip
+                      contentStyle={{
+                        border: "1px solid #e3e6e8",
+                        borderRadius: 8,
+                        fontSize: 12,
+                        backgroundColor: "#ffffff",
+                        boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
+                      }}
+                    />
+                    <Legend wrapperStyle={{ fontSize: 11, paddingTop: 6 }} />
+                    <Bar dataKey="delivered" name="Delivered" fill="#0B4044" radius={[4, 4, 0, 0]} />
+                    <Bar dataKey="podReceived" name="POD received" fill="#15803d" radius={[4, 4, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
               </div>
@@ -650,14 +764,40 @@ export default function BillingOverview({
               </p>
               <div className="billing-chart">
                 <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={dashboard.series} margin={{ top: 8, right: 12, bottom: 0, left: -12 }}>
-                    <CartesianGrid stroke="#f0f0f0" vertical={false} />
-                    <XAxis dataKey="label" tick={{ fill: "#525252", fontSize: 9 }} tickLine={false} axisLine={false} minTickGap={18} />
-                    <YAxis tickFormatter={(value: number) => `${value}d`} tick={{ fill: "#737373", fontSize: 9 }} tickLine={false} axisLine={false} width={38} />
-                    <Tooltip formatter={(value) => [value === null ? "No samples" : `${Number(value).toFixed(1)} days`, "Average"]} contentStyle={{ border: "1px solid #e5e5e5", borderRadius: 8, fontSize: 11 }} />
-                    <Legend wrapperStyle={{ fontSize: 10 }} />
-                    <ReferenceLine y={dashboard.summary.invoiceTargetDays} stroke="#d97706" strokeDasharray="5 4" />
-                    <Line type="monotone" dataKey="avgPodToInvoiceDays" name="POD to invoice" stroke="#2563eb" strokeWidth={2} dot={{ r: 3 }} connectNulls={false} />
+                  <LineChart data={dashboard.series} margin={{ top: 12, right: 16, bottom: 0, left: -10 }}>
+                    <CartesianGrid stroke="#e3e6e8" strokeDasharray="3 3" vertical={false} />
+                    <XAxis dataKey="label" tick={{ fill: "#5f6b72", fontSize: 11 }} tickLine={false} axisLine={false} minTickGap={20} />
+                    <YAxis tickFormatter={(value: number) => `${value}d`} tick={{ fill: "#5f6b72", fontSize: 11 }} tickLine={false} axisLine={false} width={38} />
+                    <Tooltip
+                      formatter={(value) => [value === null ? "No samples" : `${Number(value).toFixed(1)} days`, "Average"]}
+                      contentStyle={{
+                        border: "1px solid #e3e6e8",
+                        borderRadius: 8,
+                        fontSize: 12,
+                        backgroundColor: "#ffffff",
+                        boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
+                      }}
+                    />
+                    <ReferenceLine
+                      y={dashboard.summary.invoiceTargetDays}
+                      stroke="#9aa4a9"
+                      strokeDasharray="4 4"
+                      label={{
+                        value: `Target ${dashboard.summary.invoiceTargetDays}d`,
+                        position: "right",
+                        fill: "#5f6b72",
+                        fontSize: 10,
+                      }}
+                    />
+                    <Line
+                      type="linear"
+                      dataKey="avgPodToInvoiceDays"
+                      name="POD to invoice"
+                      stroke="#0B4044"
+                      strokeWidth={2}
+                      dot={{ r: 2.5, fill: "#0B4044" }}
+                      connectNulls={false}
+                    />
                   </LineChart>
                 </ResponsiveContainer>
               </div>

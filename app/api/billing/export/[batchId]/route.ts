@@ -1,7 +1,9 @@
 import { UserRole } from "@prisma/client";
+import { unzipSync } from "fflate";
 import { z } from "zod";
 import { requireRole } from "@/src/lib/auth/rbac/requireRole";
 import { getExportStorage } from "@/src/lib/billing/export/exportStorage";
+import { BRAND } from "@/src/lib/brand";
 import { prisma } from "@/src/lib/prisma";
 
 const requireBilling = requireRole(UserRole.BILLING_EXEC);
@@ -21,9 +23,18 @@ export async function GET(
       { status: 400 },
     );
   }
+
+  const url = new URL(request.url);
+  const format = url.searchParams.get("format"); // "xlsx" | "csv" | undefined (zip)
+
   const batch = await prisma.exportBatch.findUnique({
     where: { id: batchId },
-    select: { fileKey: true, cycleLabel: true },
+    select: {
+      fileKey: true,
+      cycleLabel: true,
+      exportedAt: true,
+      client: { select: { name: true } },
+    },
   });
   if (!batch) {
     return Response.json(
@@ -31,17 +42,54 @@ export async function GET(
       { status: 404 },
     );
   }
-  const archive = await getExportStorage().read(batch.fileKey);
-  if (!archive) {
+  const stream = await getExportStorage().read(batch.fileKey);
+  if (!stream) {
     return Response.json(
       { error: "Export archive not found.", code: "archive_not_found" },
       { status: 404 },
     );
   }
-  return new Response(archive, {
+
+  const archiveBytes = new Uint8Array(await new Response(stream).arrayBuffer());
+  const safeClient = (batch.client?.name ?? "client").replace(/[^a-zA-Z0-9._-]/g, "_").slice(0, 20);
+  const safeCycle = batch.cycleLabel.replace(/[^a-zA-Z0-9._-]/g, "_").slice(0, 24);
+  const yyyymmdd = new Date(batch.exportedAt).toISOString().slice(0, 10).replace(/-/g, "");
+
+  // If specific format requested, extract from ZIP archive
+  if (format === "xlsx" || format === "csv") {
+    try {
+      const files = unzipSync(archiveBytes);
+      const targetExtension = format === "xlsx" ? ".xlsx" : ".csv";
+      const targetName = Object.keys(files).find((name) => name.toLowerCase().endsWith(targetExtension));
+
+      if (targetName && files[targetName]) {
+        const fileBytes = files[targetName];
+        const contentType =
+          format === "xlsx"
+            ? "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            : "text/csv; charset=utf-8";
+        const downloadFilename = `Haulmark_Tally_${safeClient}_${safeCycle}.${format}`;
+
+        return new Response(fileBytes as unknown as BodyInit, {
+          headers: {
+            "Content-Type": contentType,
+            "Content-Disposition": `attachment; filename="${downloadFilename}"`,
+            "Cache-Control": "private, no-store",
+            "X-Content-Type-Options": "nosniff",
+          },
+        });
+      }
+    } catch {
+      // Fallback to serving the full zip archive
+    }
+  }
+
+  const zipFilename = `Haulmark_Tally_${safeClient}_${safeCycle}_${yyyymmdd}.zip`;
+
+  return new Response(archiveBytes as unknown as BodyInit, {
     headers: {
       "Content-Type": "application/zip",
-      "Content-Disposition": `attachment; filename="tally-export-${batch.cycleLabel}.zip"`,
+      "Content-Disposition": `attachment; filename="${zipFilename}"`,
       "Cache-Control": "private, no-store",
       "X-Content-Type-Options": "nosniff",
     },

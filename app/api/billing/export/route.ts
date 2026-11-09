@@ -7,12 +7,21 @@ import { getBillingWindow } from "@/src/lib/billing/cycle/cycle";
 import { getNonVerifiedTripIds } from "@/src/lib/billing/queue/queue";
 import { getExportStorage } from "@/src/lib/billing/export/exportStorage";
 import { getPodImageStorage } from "@/src/lib/pods/storage/imageStorage";
+import {
+  buildTallyWorkbook,
+  sanitizeTallyText,
+  sanitizeVehiclePlate,
+  type TallyExportTripItem,
+} from "@/src/lib/billing/export/tallyExport";
+import { BRAND } from "@/src/lib/brand";
 import { prisma } from "@/src/lib/prisma";
 
 const requireBilling = requireRole(UserRole.BILLING_EXEC);
 const exportSchema = z.object({
   tripIds: z.array(z.uuid()).min(1).max(100),
 }).strict();
+
+// Note: Consignee name and consignee phone are strictly omitted under the DPDP Act 2023.
 const csvHeaders = [
   "Date",
   "Party Ledger",
@@ -23,6 +32,7 @@ const csvHeaders = [
   "Route",
   "Amount",
   "Narration",
+  "POD File",
 ];
 
 function safeFilename(value: string) {
@@ -118,49 +128,103 @@ export async function POST(request: Request) {
     );
   }
 
-  const rows = trips.map((trip) => [
-    (trip.deliveredAt ?? trip.podReceivedAt ?? trip.createdAt).toISOString().slice(0, 10),
-    trip.client.tallyLedgerName,
-    trip.tripCode,
-    trip.lrNumber,
-    trip.ewayBillNo,
-    trip.vehicle.vehicleNo,
-    `${trip.origin} to ${trip.destination}`,
-    Number(trip.freight).toFixed(2),
-    `${trip.goodsDescription}; delivered quantity ${trip.deliveredQuantity ?? trip.expectedQuantity} ${trip.quantityUnit}`,
-  ]);
-  const csv = `\uFEFF${formatCsv([csvHeaders, ...rows])}`;
-  const archiveFiles: Record<string, Uint8Array> = {
-    "Tally.csv": new TextEncoder().encode(csv),
-  };
   const imageStorage = getPodImageStorage();
+  const archiveFiles: Record<string, Uint8Array> = {};
+  const exportItems: TallyExportTripItem[] = [];
+  let missingPodCount = 0;
+
   for (const trip of trips) {
     const submission = trip.podSubmissions[0];
-    if (!submission) {
-      return Response.json(
-        {
-          error: `Trip ${trip.tripCode} has no POD image.`,
-          code: "pod_image_missing",
-          tripId: trip.id,
-        },
-        { status: 409 },
-      );
+    let podFileName = "MISSING";
+
+    if (submission?.imageKey) {
+      try {
+        const image = await imageStorage.read(submission.imageKey);
+        if (image) {
+          const extension = image.contentType === "image/webp" ? "webp" : "jpg";
+          podFileName = `${safeFilename(trip.lrNumber)}_${safeFilename(trip.tripCode)}.${extension}`;
+          archiveFiles[`pods/${podFileName}`] = await toBytes(image.body);
+        } else {
+          missingPodCount += 1;
+        }
+      } catch {
+        missingPodCount += 1;
+      }
+    } else {
+      missingPodCount += 1;
     }
-    const image = await imageStorage.read(submission.imageKey);
-    if (!image) {
-      return Response.json(
-        {
-          error: `POD image for trip ${trip.tripCode} is missing.`,
-          code: "pod_image_missing",
-          tripId: trip.id,
-        },
-        { status: 409 },
-      );
-    }
-    const extension = image.contentType === "image/webp" ? "webp" : "jpg";
-    archiveFiles[`POD/${safeFilename(trip.lrNumber)}.${extension}`] =
-      await toBytes(image.body);
+
+    const tripDate = trip.deliveredAt ?? trip.podReceivedAt ?? trip.createdAt;
+    exportItems.push({
+      id: trip.id,
+      tripCode: trip.tripCode,
+      lrNumber: trip.lrNumber,
+      ewayBillNo: trip.ewayBillNo,
+      origin: trip.origin,
+      destination: trip.destination,
+      vehicleNo: trip.vehicle.vehicleNo,
+      freight: Number(trip.freight),
+      goodsDescription: trip.goodsDescription,
+      expectedQuantity: Number(trip.expectedQuantity),
+      deliveredQuantity: trip.deliveredQuantity ? Number(trip.deliveredQuantity) : null,
+      quantityUnit: trip.quantityUnit,
+      date: tripDate,
+      podFileName,
+    });
   }
+
+  // 1. Generate primary XLSX workbook
+  const now = new Date();
+  const xlsxBuffer = await buildTallyWorkbook(exportItems, {
+    clientName: client.name,
+    tallyLedgerName: client.tallyLedgerName,
+    cycleLabel: window.label,
+    exportedBy: auth.session.userId,
+    exportedAt: now,
+    missingPodCount,
+  });
+
+  // 2. Generate secondary CSV file (RFC 4180 with UTF-8 BOM, plain string IDs, numeric amounts)
+  const rows = exportItems.map((item) => [
+    item.date.toISOString().slice(0, 10),
+    sanitizeTallyText(client.tallyLedgerName),
+    sanitizeTallyText(item.tripCode),
+    sanitizeTallyText(item.lrNumber),
+    sanitizeTallyText(item.ewayBillNo),
+    sanitizeVehiclePlate(item.vehicleNo),
+    `${sanitizeTallyText(item.origin)} to ${sanitizeTallyText(item.destination)}`,
+    Number(item.freight).toFixed(2),
+    sanitizeTallyText(
+      `${item.goodsDescription}; delivered quantity ${item.deliveredQuantity ?? item.expectedQuantity} ${item.quantityUnit}`,
+    ),
+    sanitizeTallyText(item.podFileName),
+  ]);
+  const csvText = `\uFEFF${formatCsv([csvHeaders, ...rows])}`;
+
+  const clientSlug = safeFilename(client.name).slice(0, 20);
+  const cycleSlug = safeFilename(window.label).slice(0, 24);
+
+  archiveFiles[`Tally_${cycleSlug}.xlsx`] = new Uint8Array(xlsxBuffer);
+  archiveFiles[`Tally_${cycleSlug}.csv`] = new TextEncoder().encode(csvText);
+
+  // Add helpful README text
+  const readmeText = [
+    `# ${BRAND} Tally Accounting Export`,
+    `Client: ${client.name}`,
+    `Billing Cycle: ${window.label}`,
+    `Exported At: ${now.toISOString()}`,
+    `Trips: ${trips.length}`,
+    "",
+    "FILES INCLUDED:",
+    `1. ${BRAND}_Tally_${clientSlug}_${cycleSlug}.xlsx - Formatted Excel file for verification and review.`,
+    `2. ${BRAND}_Tally_${clientSlug}_${cycleSlug}.csv - Clean UTF-8 CSV with BOM for direct Tally import.`,
+    "3. pods/ - Folder containing attached Proof of Delivery images.",
+    "",
+    "DPDP ACT 2023 NOTICE:",
+    "Personal identifiable information (PII) such as consignee names and phone numbers",
+    "has been excluded in compliance with privacy regulations.",
+  ].join("\r\n");
+  archiveFiles["README.txt"] = new TextEncoder().encode(readmeText);
 
   const archive = zipSync(archiveFiles, { level: 6 });
   const exportStorage = getExportStorage();

@@ -16,6 +16,7 @@ import {
   FleetProofApiError,
   type UserSession,
 } from "@/src/lib/fleetproof";
+import { BRAND } from "@/src/lib/brand";
 import BillingNavigation from "./BillingNavigation";
 
 type BillingWorkspaceContextValue = {
@@ -53,11 +54,31 @@ function CloseIcon() {
 
 function Brand() {
   return (
-    <Link href="/billing" className="billing-brand" aria-label="Haulmark overview">
-      <span className="billing-brand-mark" aria-hidden="true">H</span>
-      <span>
-        <span className="billing-brand-name">Haulmark</span>
-        <span className="billing-brand-caption">Operations</span>
+    <Link href="/billing" className="billing-brand" aria-label={`${BRAND} operations overview`}>
+      <div
+        className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[8px] bg-[#0B4044] text-white"
+        aria-hidden="true"
+      >
+        <svg
+          className="h-4.5 w-4.5"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2.2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <rect x="2" y="4" width="20" height="16" rx="4" />
+          <path d="M7 8v8" />
+          <path d="M17 8v8" />
+          <path d="M7 12h10" />
+        </svg>
+      </div>
+      <span className="flex flex-col">
+        <span className="text-[17px] font-bold tracking-tight text-[#0B4044] leading-tight">
+          {BRAND}
+        </span>
+        <span className="text-[11px] font-medium text-[#5f6b72]">Operations</span>
       </span>
     </Link>
   );
@@ -76,16 +97,21 @@ function AccountPanel({
 }) {
   return (
     <div className="billing-account">
-      <div className="billing-user-avatar" aria-hidden="true">
-        {user.name.trim().slice(0, 1).toUpperCase()}
-      </div>
-      <div className="billing-account-copy">
-        <span className="billing-user-name">{user.name}</span>
-        <span className="billing-user-role">Billing executive</span>
+      <div className="flex items-center gap-2.5">
+        <div
+          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#0B4044]/10 text-[13px] font-semibold text-[#0B4044]"
+          aria-hidden="true"
+        >
+          {user.name.trim().slice(0, 1).toUpperCase()}
+        </div>
+        <div className="min-w-0 flex-1">
+          <span className="block truncate text-[13px] font-medium text-[#14181b]">{user.name}</span>
+          <span className="block text-[11px] text-[#5f6b72]">Billing executive</span>
+        </div>
       </div>
       <button
         type="button"
-        className="billing-signout"
+        className="mt-2 text-left text-[12px] font-medium text-[#5f6b72] hover:text-[#14181b] transition-colors focus:outline-none"
         onClick={onSignOut}
         disabled={isSigningOut}
       >
@@ -318,12 +344,15 @@ export default function BillingWorkspace({ children }: { children: ReactNode }) 
             >
               <MenuIcon />
             </button>
-            <div className="billing-topbar-title">{activePage}</div>
+            <div className="flex-1" />
             <div className="billing-topbar-user">
-              <span className="billing-user-avatar" aria-hidden="true">
+              <span
+                className="flex h-7 w-7 items-center justify-center rounded-full bg-[#0B4044]/10 text-[12px] font-semibold text-[#0B4044]"
+                aria-hidden="true"
+              >
                 {user.name.trim().slice(0, 1).toUpperCase()}
               </span>
-              <span>{user.name}</span>
+              <span className="text-[13px] font-medium text-[#14181b]">{user.name}</span>
             </div>
           </header>
           <main className="billing-content">
