@@ -61,8 +61,8 @@ function groupKey(group: BillingQueueGroup) {
   return `${group.client.id}:${group.cycleLabel}`;
 }
 
-async function downloadArchive(downloadUrl: string, cycleLabel: string) {
-  const url = new URL(downloadUrl, window.location.origin);
+async function downloadFile(urlStr: string, defaultFilename: string) {
+  const url = new URL(urlStr, window.location.origin);
   if (url.origin !== window.location.origin) {
     throw new Error("The export download URL is not on this application.");
   }
@@ -75,15 +75,25 @@ async function downloadArchive(downloadUrl: string, cycleLabel: string) {
     throw new Error(
       typeof payload?.error === "string"
         ? payload.error
-        : "The export was created, but its archive could not be downloaded.",
+        : "The export was created, but the file could not be downloaded.",
     );
   }
 
-  const archive = await response.blob();
-  const objectUrl = window.URL.createObjectURL(archive);
+  // Extract filename from Content-Disposition if present
+  let filename = defaultFilename;
+  const disposition = response.headers.get("Content-Disposition");
+  if (disposition && disposition.includes("filename=")) {
+    const match = /filename=["']?([^"';]+)["']?/.exec(disposition);
+    if (match?.[1]) {
+      filename = match[1];
+    }
+  }
+
+  const blob = await response.blob();
+  const objectUrl = window.URL.createObjectURL(blob);
   const link = document.createElement("a");
   link.href = objectUrl;
-  link.download = `tally-export-${cycleLabel.replace(/[^a-zA-Z0-9._-]/g, "_")}.zip`;
+  link.download = filename;
   document.body.append(link);
   link.click();
   link.remove();
@@ -232,26 +242,28 @@ export default function BillingQueuePage({
     }));
   };
 
-  const startDownload = async (result: ExportResult) => {
+  const startDownload = async (result: ExportResult, format?: "xlsx" | "csv") => {
     setExportError(null);
     setIsDownloading(true);
     try {
-      await downloadArchive(result.downloadUrl, result.cycleLabel);
+      const url = format ? `${result.downloadUrl}?format=${format}` : result.downloadUrl;
+      const defaultFilename = `Haulmark_Tally_${result.cycleLabel}.${format ?? "zip"}`;
+      await downloadFile(url, defaultFilename);
       setExportMessage(
-        `Downloaded ${result.tripCount} trip${result.tripCount === 1 ? "" : "s"} for ${result.cycleLabel}.`,
+        `Downloaded ${result.tripCount} trip${result.tripCount === 1 ? "" : "s"} for ${result.cycleLabel}${format ? ` (${format.toUpperCase()})` : ""}.`,
       );
     } catch (error) {
       setExportError(
         error instanceof Error
           ? error.message
-          : "The export was created, but its archive could not be downloaded.",
+          : "The export was created, but its file could not be downloaded.",
       );
     } finally {
       setIsDownloading(false);
     }
   };
 
-  const exportGroup = async (group: BillingQueueGroup) => {
+  const exportGroup = async (group: BillingQueueGroup, format?: "xlsx" | "csv") => {
     const tripIds = [...(selectedTrips[groupKey(group)] ?? [])];
     if (!tripIds.length) return;
     setExportError(null);
@@ -268,7 +280,7 @@ export default function BillingQueuePage({
       setQueueState((current) => ({ status: "loading", data: current.data }));
       setRefreshKey((key) => key + 1);
       setSelectedTrips({});
-      await startDownload(createdExport);
+      await startDownload(createdExport, format);
     } catch (error) {
       setExportError(
         error instanceof Error
@@ -483,20 +495,48 @@ export default function BillingQueuePage({
                   <span className="billing-panel-description">
                     {formatNumber(selected.size)} selected · {formatCurrency(selectedAmount)}
                   </span>
-                  <button
-                    type="button"
-                    className="billing-button billing-button-primary"
-                    disabled={
-                      selected.size === 0 ||
-                      exportingGroup !== null ||
-                      queueState.status === "loading"
-                    }
-                    onClick={() => void exportGroup(group)}
-                  >
-                    {exportingGroup === key
-                      ? "Creating export…"
-                      : `Export ${selected.size ? `selected (${selected.size})` : "batch"}`}
-                  </button>
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      className="billing-button billing-button-primary"
+                      disabled={
+                        selected.size === 0 ||
+                        exportingGroup !== null ||
+                        queueState.status === "loading"
+                      }
+                      onClick={() => void exportGroup(group, "xlsx")}
+                    >
+                      {exportingGroup === key
+                        ? "Exporting…"
+                        : `Export Excel (.xlsx)`}
+                    </button>
+                    <button
+                      type="button"
+                      className="billing-button"
+                      title="Download clean CSV for direct Tally import"
+                      disabled={
+                        selected.size === 0 ||
+                        exportingGroup !== null ||
+                        queueState.status === "loading"
+                      }
+                      onClick={() => void exportGroup(group, "csv")}
+                    >
+                      Export CSV
+                    </button>
+                    <button
+                      type="button"
+                      className="billing-button"
+                      title="Download complete ZIP containing XLSX, CSV and all attached POD images"
+                      disabled={
+                        selected.size === 0 ||
+                        exportingGroup !== null ||
+                        queueState.status === "loading"
+                      }
+                      onClick={() => void exportGroup(group)}
+                    >
+                      Export ZIP (with PODs)
+                    </button>
+                  </div>
                 </div>
               </section>
             );
