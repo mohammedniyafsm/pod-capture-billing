@@ -125,6 +125,7 @@ model Trip {
   podReceivedAt      DateTime?
   verifiedAt         DateTime?
   invoicedAt         DateTime?
+  invoiceNumber      String?
   status             TripStatus  @default(ASSIGNED)
   statusReason       String?
   retakeCount        Int         @default(0)
@@ -229,6 +230,18 @@ model UploadLink {
   @@index([tripId])
   @@index([expiresAt])
 }
+
+model SmsOutbox {
+  id        String   @id @default(uuid())
+  toPhone   String
+  body      String
+  tripId    String?
+  createdAt DateTime @default(now())
+
+  @@index([tripId, createdAt])
+}
+
+
 
 
 model AuditLog {

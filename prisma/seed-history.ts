@@ -444,9 +444,13 @@ async function main() {
 
         // EXPORTED means sent to the accounting/export workflow, not invoiced.
         // Only INVOICED trips receive invoicedAt.
+        // Story: older invoiced trips around 15-20 days, recent ones trending toward 4-6 days across branches
         if (status === "INVOICED") {
+          // progress ranges from 0 (oldest) to 1 (most recent)
+          // older: ~15 to 20 days; recent: ~4 to 6 days
+          const delayDays = Math.round((18 - progress * 13) * 10) / 10;
           invoicedAt = new Date(
-            verifiedAt.getTime() + (2 + (index % 4)) * DAY_MS,
+            podReceivedAt.getTime() + delayDays * DAY_MS,
           );
         }
       } else if (status === "NEEDS_REVIEW") {

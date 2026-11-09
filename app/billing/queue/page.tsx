@@ -1,5 +1,7 @@
 import BillingQueuePage from "./BillingQueue";
 
+export const instant = false;
+
 type SearchParams = {
   client?: string | string[];
   cycle?: string | string[];

@@ -9,6 +9,7 @@ export const navigation = [
   { href: "/billing/review", label: "POD review", icon: "review" },
   { href: "/billing/queue", label: "Billing queue", icon: "billing" },
   { href: "/billing/trips", label: "Trips", icon: "trips" },
+  { href: "/billing/import", label: "Import trips", icon: "import" },
 ];
 
 function NavigationIcon({ name }: { name: string }) {
@@ -17,6 +18,7 @@ function NavigationIcon({ name }: { name: string }) {
     review: <><path d="M8 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V9" /><path d="M8 12h8M8 16h5M15 3h6v6M21 3l-9 9" /></>,
     billing: <><path d="M4 4h16v16H4z" /><path d="M8 8h8M8 12h8M8 16h5" /></>,
     trips: <><path d="M3 6h18M3 12h18M3 18h18M7 6v12M17 6v12" /></>,
+    import: <><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="17 8 12 3 7 8" /><line x1="12" y1="3" x2="12" y2="15" /></>,
   };
   return (
     <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">

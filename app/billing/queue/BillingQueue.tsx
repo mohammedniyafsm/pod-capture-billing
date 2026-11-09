@@ -29,7 +29,7 @@ type BillingQueueGroup = {
   totalAmount: number;
   trips: BillingQueueTrip[];
 };
-type QueueFilters = { client: string; cycle: string; branch: string };
+type QueueFilters = { client: string; cycle: string; branch: string; status?: string };
 type QueueData = { groups: BillingQueueGroup[] };
 type PanelState<T> =
   | { status: "loading"; data?: T }
@@ -115,6 +115,9 @@ export default function BillingQueuePage({
   const [draftClient, setDraftClient] = useState(initialFilters.client);
   const [draftCycle, setDraftCycle] = useState(initialFilters.cycle);
   const [draftBranch, setDraftBranch] = useState(initialFilters.branch);
+  const [draftStatus, setDraftStatus] = useState<"VERIFIED" | "EXPORTED">(
+    (initialFilters.status as "VERIFIED" | "EXPORTED") || "VERIFIED",
+  );
   const [filters, setFilters] = useState(initialFilters);
   const [refreshKey, setRefreshKey] = useState(0);
   const [selectedTrips, setSelectedTrips] = useState<Record<string, Set<string>>>({});
@@ -123,6 +126,15 @@ export default function BillingQueuePage({
   const [exportMessage, setExportMessage] = useState<string | null>(null);
   const [lastExport, setLastExport] = useState<ExportResult | null>(null);
   const [isDownloading, setIsDownloading] = useState(false);
+  const [invoiceDialogOpen, setInvoiceDialogOpen] = useState(false);
+  const [invoiceTripIds, setInvoiceTripIds] = useState<string[]>([]);
+  const [invoiceNumberInput, setInvoiceNumberInput] = useState("");
+  const [invoiceDateInput, setInvoiceDateInput] = useState(
+    new Date().toISOString().split("T")[0],
+  );
+  const [isSubmittingInvoice, setIsSubmittingInvoice] = useState(false);
+  const [invoiceError, setInvoiceError] = useState<string | null>(null);
+  const [invoiceSuccess, setInvoiceSuccess] = useState<string | null>(null);
 
   useEffect(() => {
     const onPopState = () => {
@@ -167,6 +179,7 @@ export default function BillingQueuePage({
     if (filters.client.trim()) params.set("client", filters.client.trim());
     if (filters.cycle) params.set("cycle", filters.cycle);
     if (filters.branch) params.set("branch", filters.branch);
+    if (filters.status) params.set("status", filters.status);
     void fetchJson<QueueData>(
       `/api/billing/queue${params.size ? `?${params}` : ""}`,
     )
@@ -204,6 +217,7 @@ export default function BillingQueuePage({
       client: draftClient.trim(),
       cycle: draftCycle,
       branch: draftBranch,
+      status: draftStatus,
     };
     setQueueState((current) => ({ status: "loading", data: current.data }));
     setFilters(nextFilters);
@@ -212,6 +226,7 @@ export default function BillingQueuePage({
     if (nextFilters.client) params.set("client", nextFilters.client);
     if (nextFilters.cycle) params.set("cycle", nextFilters.cycle);
     if (nextFilters.branch) params.set("branch", nextFilters.branch);
+    if (nextFilters.status) params.set("status", nextFilters.status);
     router.push(
       `/billing/queue${params.size ? `?${params}` : ""}`,
       { scroll: false },
@@ -240,6 +255,45 @@ export default function BillingQueuePage({
         ? new Set(group.trips.map((trip) => trip.id))
         : new Set(),
     }));
+  };
+
+  const openInvoiceDialog = (tripIds: string[]) => {
+    setInvoiceTripIds(tripIds);
+    setInvoiceNumberInput("");
+    setInvoiceDateInput(new Date().toISOString().split("T")[0]);
+    setInvoiceError(null);
+    setInvoiceDialogOpen(true);
+  };
+
+  const handleMarkAsInvoiced = async (e: FormEvent) => {
+    e.preventDefault();
+    if (invoiceTripIds.length === 0) return;
+    setIsSubmittingInvoice(true);
+    setInvoiceError(null);
+    try {
+      const res = await fetch("/api/trips/invoice", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          tripIds: invoiceTripIds,
+          invoiceNumber: invoiceNumberInput.trim() || undefined,
+          invoiceDate: new Date(invoiceDateInput).toISOString(),
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || "Failed to mark trips as invoiced.");
+      }
+
+      setInvoiceSuccess(data.message || `${invoiceTripIds.length} trip(s) marked as invoiced.`);
+      setInvoiceDialogOpen(false);
+      refreshQueue();
+    } catch (err: unknown) {
+      setInvoiceError(err instanceof Error ? err.message : "Failed to mark as invoiced.");
+    } finally {
+      setIsSubmittingInvoice(false);
+    }
   };
 
   const startDownload = async (result: ExportResult, format?: "xlsx" | "csv") => {
@@ -354,6 +408,19 @@ export default function BillingQueuePage({
               : null}
           </select>
         </label>
+        <label className="billing-filter">
+          <span className="billing-filter-label">Queue stage</span>
+          <select
+            className="billing-select"
+            value={draftStatus}
+            onChange={(event) =>
+              setDraftStatus(event.target.value as "VERIFIED" | "EXPORTED")
+            }
+          >
+            <option value="VERIFIED">Verified (Ready to export)</option>
+            <option value="EXPORTED">Exported (Awaiting invoice)</option>
+          </select>
+        </label>
         <button type="submit" className="billing-button billing-button-primary">
           Apply filters
         </button>
@@ -364,6 +431,11 @@ export default function BillingQueuePage({
         ) : null}
       </form>
 
+      {invoiceSuccess ? (
+        <p className="billing-state is-success" role="status">
+          {invoiceSuccess}
+        </p>
+      ) : null}
       {exportError ? (
         <section className="billing-state is-error" role="alert">
           <p>{exportError}</p>
@@ -461,6 +533,7 @@ export default function BillingQueuePage({
                         <th scope="col" className="billing-number">Freight</th>
                         <th scope="col">Delivered</th>
                         <th scope="col">Status</th>
+                        <th scope="col" className="text-right">Action</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -485,7 +558,26 @@ export default function BillingQueuePage({
                           <td>{trip.destination}</td>
                           <td className="billing-number">{formatCurrency(trip.freight)}</td>
                           <td>{formatDate(trip.deliveredAt)}</td>
-                          <td><span className="billing-status is-success">{trip.status.replaceAll("_", " ")}</span></td>
+                          <td>
+                            <span
+                              className={`billing-status ${
+                                trip.status === "EXPORTED" ? "is-info" : "is-success"
+                              }`}
+                            >
+                              {trip.status.replaceAll("_", " ")}
+                            </span>
+                          </td>
+                          <td className="text-right">
+                            {trip.status === "EXPORTED" ? (
+                              <button
+                                type="button"
+                                className="billing-button text-xs py-1 px-2.5 h-auto min-h-0"
+                                onClick={() => openInvoiceDialog([trip.id])}
+                              >
+                                Mark invoiced
+                              </button>
+                            ) : null}
+                          </td>
                         </tr>
                       ))}
                     </tbody>
@@ -496,46 +588,64 @@ export default function BillingQueuePage({
                     {formatNumber(selected.size)} selected · {formatCurrency(selectedAmount)}
                   </span>
                   <div className="flex items-center gap-2">
-                    <button
-                      type="button"
-                      className="billing-button billing-button-primary"
-                      disabled={
-                        selected.size === 0 ||
-                        exportingGroup !== null ||
-                        queueState.status === "loading"
-                      }
-                      onClick={() => void exportGroup(group, "xlsx")}
-                    >
-                      {exportingGroup === key
-                        ? "Exporting…"
-                        : `Export Excel (.xlsx)`}
-                    </button>
-                    <button
-                      type="button"
-                      className="billing-button"
-                      title="Download clean CSV for direct Tally import"
-                      disabled={
-                        selected.size === 0 ||
-                        exportingGroup !== null ||
-                        queueState.status === "loading"
-                      }
-                      onClick={() => void exportGroup(group, "csv")}
-                    >
-                      Export CSV
-                    </button>
-                    <button
-                      type="button"
-                      className="billing-button"
-                      title="Download complete ZIP containing XLSX, CSV and all attached POD images"
-                      disabled={
-                        selected.size === 0 ||
-                        exportingGroup !== null ||
-                        queueState.status === "loading"
-                      }
-                      onClick={() => void exportGroup(group)}
-                    >
-                      Export ZIP (with PODs)
-                    </button>
+                    {group.trips.some((t) => t.status === "EXPORTED") ? (
+                      <button
+                        type="button"
+                        className="billing-button"
+                        style={{ borderColor: "#0B4044", color: "#0B4044" }}
+                        disabled={
+                          selected.size === 0 ||
+                          isSubmittingInvoice ||
+                          queueState.status === "loading"
+                        }
+                        onClick={() => openInvoiceDialog(Array.from(selected))}
+                      >
+                        Mark selected as invoiced
+                      </button>
+                    ) : (
+                      <>
+                        <button
+                          type="button"
+                          className="billing-button billing-button-primary"
+                          disabled={
+                            selected.size === 0 ||
+                            exportingGroup !== null ||
+                            queueState.status === "loading"
+                          }
+                          onClick={() => void exportGroup(group, "xlsx")}
+                        >
+                          {exportingGroup === key
+                            ? "Exporting…"
+                            : `Export Excel (.xlsx)`}
+                        </button>
+                        <button
+                          type="button"
+                          className="billing-button"
+                          title="Download clean CSV for direct Tally import"
+                          disabled={
+                            selected.size === 0 ||
+                            exportingGroup !== null ||
+                            queueState.status === "loading"
+                          }
+                          onClick={() => void exportGroup(group, "csv")}
+                        >
+                          Export CSV
+                        </button>
+                        <button
+                          type="button"
+                          className="billing-button"
+                          title="Download complete ZIP containing XLSX, CSV and all attached POD images"
+                          disabled={
+                            selected.size === 0 ||
+                            exportingGroup !== null ||
+                            queueState.status === "loading"
+                          }
+                          onClick={() => void exportGroup(group)}
+                        >
+                          Export ZIP (with PODs)
+                        </button>
+                      </>
+                    )}
                   </div>
                 </div>
               </section>
@@ -543,6 +653,89 @@ export default function BillingQueuePage({
           })}
         </div>
       )}
+
+      {/* Mark as Invoiced Modal Dialog */}
+      {invoiceDialogOpen ? (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="invoice-dialog-title"
+        >
+          <div className="w-full max-w-md rounded-[10px] border border-[#e3e6e8] bg-white p-6 shadow-xl">
+            <h2 id="invoice-dialog-title" className="text-base font-semibold text-neutral-900 mb-1">
+              Mark {invoiceTripIds.length} trip{invoiceTripIds.length === 1 ? "" : "s"} as invoiced
+            </h2>
+            <p className="text-xs text-[#5f6b72] mb-4">
+              Record the invoice date and optional Tally invoice voucher number.
+            </p>
+
+            {invoiceError ? (
+              <div className="mb-4 rounded-lg border border-red-200 bg-red-50 p-3 text-xs text-red-700" role="alert">
+                <p className="font-medium">{invoiceError}</p>
+                <button
+                  type="button"
+                  className="mt-1 font-semibold underline hover:text-red-800"
+                  onClick={() => setInvoiceError(null)}
+                >
+                  Try again
+                </button>
+              </div>
+            ) : null}
+
+            <form onSubmit={handleMarkAsInvoiced} className="space-y-4">
+              <div>
+                <label className="block text-xs font-medium text-neutral-700 mb-1">
+                  Tally invoice number <span className="text-neutral-400 font-normal">(optional)</span>
+                </label>
+                <input
+                  type="text"
+                  className="billing-input"
+                  placeholder="e.g. INV/2026-27/001"
+                  maxLength={40}
+                  value={invoiceNumberInput}
+                  onChange={(e) => setInvoiceNumberInput(e.target.value)}
+                  disabled={isSubmittingInvoice}
+                />
+                <span className="text-[11px] text-[#5f6b72]">Max 40 chars: letters, digits, - and /</span>
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-neutral-700 mb-1">
+                  Invoice date
+                </label>
+                <input
+                  type="date"
+                  required
+                  className="billing-input"
+                  value={invoiceDateInput}
+                  max={new Date().toISOString().split("T")[0]}
+                  onChange={(e) => setInvoiceDateInput(e.target.value)}
+                  disabled={isSubmittingInvoice}
+                />
+              </div>
+
+              <div className="flex items-center justify-end gap-3 pt-2">
+                <button
+                  type="button"
+                  className="billing-button"
+                  onClick={() => setInvoiceDialogOpen(false)}
+                  disabled={isSubmittingInvoice}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="billing-button billing-button-primary"
+                  disabled={isSubmittingInvoice}
+                >
+                  {isSubmittingInvoice ? "Marking invoiced…" : "Confirm invoice"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }

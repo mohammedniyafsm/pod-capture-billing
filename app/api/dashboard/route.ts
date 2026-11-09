@@ -9,6 +9,11 @@ import {
   isWithinDashboardWindow,
   type DashboardRange,
 } from "@/src/lib/dashboard/analytics";
+import {
+  aggregateBranchPodToInvoice,
+  calculateMedian,
+  calculatePodToInvoiceDays,
+} from "@/src/lib/metrics";
 import { prisma } from "@/src/lib/prisma";
 
 const requireBilling = requireRole(UserRole.BILLING_EXEC);
@@ -149,26 +154,27 @@ export async function GET(request: Request) {
     buckets: { "0-3": 0, "4-10": 0, over10: 0 },
     trips: [],
   });
+
+  const branchMetrics = aggregateBranchPodToInvoice(
+    windowTrips.map((t) => ({
+      branchId: t.branchId,
+      podReceivedAt: t.podReceivedAt,
+      invoicedAt: isWithinDashboardWindow(t.invoicedAt, from, to) ? t.invoicedAt : null,
+    })),
+    selectedBranches,
+  );
+  const branchMetricsMap = new Map(branchMetrics.map((m) => [m.branchId, m]));
+
   const byBranch = selectedBranches.map((item) => {
-    const invoiceDurations = windowTrips
-      .filter(
-        (trip) =>
-          trip.branchId === item.id &&
-          isWithinDashboardWindow(trip.invoicedAt, from, to) &&
-          trip.podReceivedAt !== null &&
-          trip.invoicedAt !== null &&
-          trip.invoicedAt >= trip.podReceivedAt,
-      )
-      .map((trip) => daysBetween(trip.podReceivedAt!, trip.invoicedAt!));
-    const avgPodToInvoiceDays =
-      invoiceDurations.length === 0
-        ? null
-        : invoiceDurations.reduce((total, days) => total + days, 0) /
-        invoiceDurations.length;
+    const metric = branchMetricsMap.get(item.id);
+    const avgPodToInvoiceDays = metric?.averageDays ?? null;
     return {
       branchId: item.id,
       branch: item.name,
       avgPodToInvoiceDays,
+      medianPodToInvoiceDays: metric?.medianDays ?? null,
+      invoicedCount: metric?.invoicedCount ?? 0,
+      pendingCount: metric?.pendingCount ?? 0,
       invoiceTargetDays: INVOICE_TARGET_DAYS,
       withinTarget:
         avgPodToInvoiceDays === null
