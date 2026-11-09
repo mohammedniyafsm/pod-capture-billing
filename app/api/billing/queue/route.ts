@@ -9,6 +9,7 @@ const filtersSchema = z.object({
   client: z.string().trim().min(1).max(100).optional(),
   cycle: z.nativeEnum(BillingCycle).optional(),
   branch: z.string().trim().min(1).max(100).optional(),
+  status: z.enum(["VERIFIED", "EXPORTED"]).default("VERIFIED"),
 });
 
 export async function GET(request: Request) {
@@ -20,6 +21,7 @@ export async function GET(request: Request) {
     client: url.searchParams.get("client") ?? undefined,
     cycle: url.searchParams.get("cycle") ?? undefined,
     branch: url.searchParams.get("branch") ?? undefined,
+    status: url.searchParams.get("status") ?? undefined,
   });
   if (!parsed.success) {
     return Response.json(
@@ -28,10 +30,11 @@ export async function GET(request: Request) {
     );
   }
 
-  const { client, cycle, branch } = parsed.data;
+  const { client, cycle, branch, status } = parsed.data;
+  const targetStatus = status === "EXPORTED" ? TripStatus.EXPORTED : TripStatus.VERIFIED;
   const trips = await prisma.trip.findMany({
     where: {
-      status: TripStatus.VERIFIED,
+      status: targetStatus,
       AND: [
         ...(client
           ? [

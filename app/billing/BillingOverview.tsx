@@ -34,6 +34,9 @@ type DashboardBranch = {
   branchId: string;
   branch: string;
   avgPodToInvoiceDays: number | null;
+  medianPodToInvoiceDays?: number | null;
+  invoicedCount?: number;
+  pendingCount?: number;
   invoiceTargetDays: number;
   withinTarget: boolean | null;
   tripsWithoutPod: {
@@ -187,6 +190,7 @@ function Metric({
   onRetry,
   isAccent,
   showDot,
+  onClick,
 }: {
   label: string;
   value: string;
@@ -195,9 +199,10 @@ function Metric({
   onRetry: () => void;
   isAccent?: boolean;
   showDot?: boolean;
+  onClick?: () => void;
 }) {
-  return (
-    <section className="billing-metric" aria-label={label}>
+  const content = (
+    <>
       <div className="billing-metric-label">
         <span>{label}</span>
       </div>
@@ -218,6 +223,25 @@ function Metric({
           </p>
         </>
       )}
+    </>
+  );
+
+  if (onClick && state === "ready") {
+    return (
+      <button
+        type="button"
+        onClick={onClick}
+        className="billing-metric text-left w-full cursor-pointer hover:border-[#0B4044] transition-colors focus:outline-none focus:ring-2 focus:ring-[#0B4044]"
+        aria-label={`${label}: click to view delivered trips awaiting POD`}
+      >
+        {content}
+      </button>
+    );
+  }
+
+  return (
+    <section className="billing-metric" aria-label={label}>
+      {content}
     </section>
   );
 }
@@ -509,6 +533,9 @@ export default function BillingOverview({
           onRetry={retryDashboardData}
           isAccent={true}
           showDot={missingPodCount > 0}
+          onClick={() => {
+            router.push("/billing/trips?podStatus=POD_PENDING");
+          }}
         />
         <Metric
           label="Awaiting review"
@@ -742,34 +769,63 @@ export default function BillingOverview({
 
         <section className="billing-panel billing-chart-panel">
           <ChartHeading
-            title="Average POD-to-invoice time"
-            description={`Days from POD receipt to invoice · target ${dashboard?.summary.invoiceTargetDays ?? 4} days`}
+            title="POD-to-invoice days by branch"
+            description={`Average days from POD receipt to invoice · target ${dashboard?.summary.invoiceTargetDays ?? 4} days`}
           />
           {!dashboard ? (
             <PanelStateMessage state={dashboardState} onRetry={retryDashboardData} />
-          ) : dashboard.series.every((bucket) => bucket.avgPodToInvoiceDays === null) ? (
+          ) : dashboard.byBranch.every((b) => b.avgPodToInvoiceDays === null) ? (
             <PanelStateMessage
               state={dashboardState}
               onRetry={retryDashboardData}
-              empty="No completed POD-to-invoice samples are available for this period."
+              empty="No invoiced trips in this period."
             />
           ) : (
             <>
-              <p className="billing-chart-summary" role="img" aria-label={`Average POD-to-invoice time by ${dashboard.granularity}: ${dashboard.series.map((bucket) => `${bucket.label}: ${bucket.avgPodToInvoiceDays === null ? "no completed samples" : `${bucket.avgPodToInvoiceDays.toFixed(1)} days across ${bucket.podToInvoiceSampleSize} valid samples`}`).join("; ")}. Target ${dashboard.summary.invoiceTargetDays} days.`}>
-                Average time is{" "}
-                {dashboard.summary.avgPodToInvoiceDays === null
-                  ? "not available"
-                  : `${dashboard.summary.avgPodToInvoiceDays.toFixed(1)} days`}{" "}
-                across {formatNumber(dashboard.summary.podToInvoiceSampleSize)} completed invoice samples in this range.
+              <p
+                className="billing-chart-summary"
+                role="img"
+                aria-label={`POD-to-invoice days by branch: ${dashboard.byBranch
+                  .map(
+                    (b) =>
+                      `${b.branch}: ${
+                        b.avgPodToInvoiceDays === null
+                          ? "no invoiced trips"
+                          : `${b.avgPodToInvoiceDays.toFixed(1)} days avg, median ${b.medianPodToInvoiceDays?.toFixed(1) ?? "—"} days (${b.invoicedCount ?? 0} invoiced, ${b.pendingCount ?? 0} still pending)`
+                      }`,
+                  )
+                  .join("; ")}. Target ${dashboard.summary.invoiceTargetDays} days.`}
+              >
+                Target is {dashboard.summary.invoiceTargetDays} days from POD verification to invoice.
               </p>
               <div className="billing-chart">
                 <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={dashboard.series} margin={{ top: 12, right: 16, bottom: 0, left: -10 }}>
-                    <CartesianGrid stroke="#e3e6e8" strokeDasharray="3 3" vertical={false} />
-                    <XAxis dataKey="label" tick={{ fill: "#5f6b72", fontSize: 11 }} tickLine={false} axisLine={false} minTickGap={20} />
-                    <YAxis tickFormatter={(value: number) => `${value}d`} tick={{ fill: "#5f6b72", fontSize: 11 }} tickLine={false} axisLine={false} width={38} />
+                  <BarChart
+                    data={dashboard.byBranch.map((b) => ({
+                      branch: b.branch,
+                      avgDays: b.avgPodToInvoiceDays,
+                      fill:
+                        b.avgPodToInvoiceDays !== null && b.avgPodToInvoiceDays > (dashboard.summary.invoiceTargetDays ?? 4)
+                          ? "#d97706"
+                          : "#0B4044",
+                    }))}
+                    layout="vertical"
+                    margin={{ top: 12, right: 48, bottom: 0, left: 12 }}
+                  >
+                    <XAxis type="number" tick={{ fill: "#5f6b72", fontSize: 11 }} tickLine={false} axisLine={false} domain={[0, "auto"]} />
+                    <YAxis
+                      type="category"
+                      dataKey="branch"
+                      width={112}
+                      tick={{ fill: "#5f6b72", fontSize: 11 }}
+                      tickLine={false}
+                      axisLine={false}
+                    />
                     <Tooltip
-                      formatter={(value) => [value === null ? "No samples" : `${Number(value).toFixed(1)} days`, "Average"]}
+                      formatter={(val) => [
+                        val === null ? "No invoiced trips" : `${Number(val).toFixed(1)} days`,
+                        "Average",
+                      ]}
                       contentStyle={{
                         border: "1px solid #e3e6e8",
                         borderRadius: 8,
@@ -779,28 +835,81 @@ export default function BillingOverview({
                       }}
                     />
                     <ReferenceLine
-                      y={dashboard.summary.invoiceTargetDays}
+                      x={dashboard.summary.invoiceTargetDays}
                       stroke="#9aa4a9"
                       strokeDasharray="4 4"
                       label={{
-                        value: `Target ${dashboard.summary.invoiceTargetDays}d`,
-                        position: "right",
+                        value: "Target 4 days",
+                        position: "top",
                         fill: "#5f6b72",
                         fontSize: 10,
                       }}
                     />
-                    <Line
-                      type="linear"
-                      dataKey="avgPodToInvoiceDays"
-                      name="POD to invoice"
-                      stroke="#0B4044"
-                      strokeWidth={2}
-                      dot={{ r: 2.5, fill: "#0B4044" }}
-                      connectNulls={false}
-                    />
-                  </LineChart>
+                    <Bar
+                      dataKey="avgDays"
+                      radius={[0, 4, 4, 0]}
+                      label={{
+                        position: "right",
+                        fill: "#5f6b72",
+                        fontSize: 11,
+                        formatter: (val: unknown) =>
+                          val === null || val === undefined || Number.isNaN(Number(val))
+                            ? "—"
+                            : `${Number(val).toFixed(1)}d`,
+                      }}
+                    >
+                      {dashboard.byBranch.map((b) => (
+                        <Cell
+                          key={b.branchId}
+                          fill={
+                            b.avgPodToInvoiceDays !== null && b.avgPodToInvoiceDays > (dashboard.summary.invoiceTargetDays ?? 4)
+                              ? "#d97706"
+                              : "#0B4044"
+                          }
+                        />
+                      ))}
+                    </Bar>
+                  </BarChart>
                 </ResponsiveContainer>
               </div>
+
+              {/* Per-branch median and invoiced / pending summary */}
+              <div className="px-5 py-3 border-t border-[#e3e6e8]/60 bg-neutral-50/50 flex flex-wrap gap-x-6 gap-y-2 text-[12px] text-[#5f6b72]">
+                {dashboard.byBranch.map((b) => (
+                  <div key={b.branchId} className="flex items-center gap-1.5">
+                    <span className="font-medium text-neutral-900">{b.branch}:</span>
+                    <span>
+                      median {b.medianPodToInvoiceDays !== null && b.medianPodToInvoiceDays !== undefined ? `${b.medianPodToInvoiceDays.toFixed(1)}d` : "—"} ·{" "}
+                      {b.invoicedCount ?? 0} invoiced, {b.pendingCount ?? 0} still pending
+                    </span>
+                  </div>
+                ))}
+              </div>
+
+              {/* Screen-reader accessible table */}
+              <table className="billing-sr-only">
+                <caption>POD-to-invoice days and completion by branch</caption>
+                <thead>
+                  <tr>
+                    <th scope="col">Branch</th>
+                    <th scope="col">Average days</th>
+                    <th scope="col">Median days</th>
+                    <th scope="col">Invoiced trips</th>
+                    <th scope="col">Pending trips</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {dashboard.byBranch.map((b) => (
+                    <tr key={b.branchId}>
+                      <td>{b.branch}</td>
+                      <td>{b.avgPodToInvoiceDays !== null ? `${b.avgPodToInvoiceDays.toFixed(1)} days` : "No data"}</td>
+                      <td>{b.medianPodToInvoiceDays !== null && b.medianPodToInvoiceDays !== undefined ? `${b.medianPodToInvoiceDays.toFixed(1)} days` : "No data"}</td>
+                      <td>{b.invoicedCount ?? 0}</td>
+                      <td>{b.pendingCount ?? 0}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </>
           )}
         </section>

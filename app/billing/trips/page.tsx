@@ -1,5 +1,7 @@
 import TripsManagementPage from "./TripsManagement";
 
+export const instant = false;
+
 type SearchParams = {
   search?: string | string[];
   clientId?: string | string[];
@@ -14,10 +16,8 @@ type SearchParams = {
 
 export default async function TripsRoute({
   searchParams,
-}: {
-  searchParams: Promise<SearchParams>;
-}) {
-  const params = await searchParams;
+}: PageProps<"/billing/trips">) {
+  const params = ((await searchParams) ?? {}) as SearchParams;
   const initialFilters = {
     search: typeof params.search === "string" ? params.search : "",
     clientId: typeof params.clientId === "string" ? params.clientId : "",

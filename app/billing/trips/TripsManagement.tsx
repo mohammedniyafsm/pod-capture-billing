@@ -524,6 +524,7 @@ export default function TripsManagementPage({
             <option value="POD_PENDING">POD Pending</option>
             <option value="AI_CHECKING">AI Checking</option>
             <option value="VERIFIED">Verified</option>
+            <option value="EXPORTED">Exported</option>
             <option value="NEEDS_REVIEW">Needs Review</option>
             <option value="RETAKE_REQUESTED">Retake Requested</option>
             <option value="INVOICED">Invoiced</option>
