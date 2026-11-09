@@ -31,10 +31,12 @@ export default function LoginPage() {
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const [checkingSession, setCheckingSession] = useState(true);
   const [pendingLogoutStatus, setPendingLogoutStatus] = useState<string | null>(null);
 
   useEffect(() => {
+    setMounted(true);
     const checkSession = async () => {
       // 1. If an offline logout was performed previously, flush the server-side revocation now
       if (isPendingLogout()) {
@@ -151,7 +153,7 @@ export default function LoginPage() {
     }
   };
 
-  if (checkingSession) {
+  if (!mounted || checkingSession) {
     return (
       <div className="flex min-h-screen flex-col bg-white">
         {/* Mobile Top Navbar Skeleton */}

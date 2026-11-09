@@ -1,0 +1,704 @@
+{
+  "voice/marathi/photograph_pod.mp3": {
+    "text": "कृपया सही केलेल्या पोहोच पावतीचा स्पष्ट फोटो काढून अपलोड करा.",
+    "hash": "fbef7f9e95e243a5",
+    "path": "/voice/marathi/photograph_pod.mp3",
+    "updatedAt": "2026-11-09T06:36:52.180Z"
+  },
+  "voice/hindi/photograph_pod.mp3": {
+    "text": "कृपया हस्ताक्षरित डिलीवरी चालान की साफ़ फ़ोटो खींचें और अपलोड करें।",
+    "hash": "1cf7603a0db5ccd3",
+    "path": "/voice/hindi/photograph_pod.mp3",
+    "updatedAt": "2026-11-09T06:36:55.691Z"
+  },
+  "voice/english/photograph_pod.mp3": {
+    "text": "Please take a clear photograph of the signed POD document.",
+    "hash": "2ebf6e68b35cd2fe",
+    "path": "/voice/english/photograph_pod.mp3",
+    "updatedAt": "2026-11-09T06:37:00.081Z"
+  },
+  "voice/marathi/pod_verified.mp3": {
+    "text": "पीओडी पडताळणी झाली आहे. पुढील कोणतीही कृती आवश्यक नाही.",
+    "hash": "71dff1ab4ed161bb",
+    "path": "/voice/marathi/pod_verified.mp3",
+    "updatedAt": "2026-11-09T06:37:07.596Z"
+  },
+  "voice/hindi/pod_verified.mp3": {
+    "text": "पीओडी सत्यापित हो चुका है। अब कुछ करने की आवश्यकता नहीं है।",
+    "hash": "02b0c497aefbc85e",
+    "path": "/voice/hindi/pod_verified.mp3",
+    "updatedAt": "2026-11-09T06:37:12.802Z"
+  },
+  "voice/english/pod_verified.mp3": {
+    "text": "POD verified. Nothing more to do.",
+    "hash": "93cb60130177ff4a",
+    "path": "/voice/english/pod_verified.mp3",
+    "updatedAt": "2026-11-09T06:37:15.513Z"
+  },
+  "voice/marathi/under_review.mp3": {
+    "text": "कमाल फोटो मर्यादा संपली आहे. कार्यालयीन पडताळणी सुरू आहे.",
+    "hash": "f3d1364eac9676ad",
+    "path": "/voice/marathi/under_review.mp3",
+    "updatedAt": "2026-11-09T06:37:17.430Z"
+  },
+  "voice/hindi/under_review.mp3": {
+    "text": "अधिकतम प्रयास समाप्त हो गए हैं। कार्यालयीन समीक्षा जारी है।",
+    "hash": "a22e4c047644d669",
+    "path": "/voice/hindi/under_review.mp3",
+    "updatedAt": "2026-11-09T06:37:22.819Z"
+  },
+  "voice/english/under_review.mp3": {
+    "text": "Maximum attempts reached. Office review in progress.",
+    "hash": "146d971135fb7987",
+    "path": "/voice/english/under_review.mp3",
+    "updatedAt": "2026-11-09T06:37:29.114Z"
+  },
+  "voice/marathi/retake_stamp.mp3": {
+    "text": "फोटो पुन्हा काढा. कारण: ग्राहकाचा शिक्का दिसत नाही.",
+    "hash": "2485ac07cbb99609",
+    "path": "/voice/marathi/retake_stamp.mp3",
+    "updatedAt": "2026-11-09T06:37:33.157Z"
+  },
+  "voice/hindi/retake_stamp.mp3": {
+    "text": "फ़ोटो दोबारा लें। कारण: प्राप्तकर्ता की मुहर दिखाई नहीं दे रही है।",
+    "hash": "cd522daf4d35711c",
+    "path": "/voice/hindi/retake_stamp.mp3",
+    "updatedAt": "2026-11-09T06:37:36.248Z"
+  },
+  "voice/english/retake_stamp.mp3": {
+    "text": "Retake photo. Reason: Consignee stamp is not visible.",
+    "hash": "a6e7fb98bc622d25",
+    "path": "/voice/english/retake_stamp.mp3",
+    "updatedAt": "2026-11-09T06:37:38.439Z"
+  },
+  "voice/marathi/retake_signature.mp3": {
+    "text": "फोटो पुन्हा काढा. कारण: पोहोच पावतीवर स्वाक्षरी नाही.",
+    "hash": "94bdf9423755e295",
+    "path": "/voice/marathi/retake_signature.mp3",
+    "updatedAt": "2026-11-09T06:37:40.795Z"
+  },
+  "voice/hindi/retake_signature.mp3": {
+    "text": "फ़ोटो दोबारा लें। कारण: हस्ताक्षर गायब है।",
+    "hash": "c207f9c71fb698aa",
+    "path": "/voice/hindi/retake_signature.mp3",
+    "updatedAt": "2026-11-09T06:37:43.207Z"
+  },
+  "voice/english/retake_signature.mp3": {
+    "text": "Retake photo. Reason: Receiver signature is missing.",
+    "hash": "8675e376ce376d10",
+    "path": "/voice/english/retake_signature.mp3",
+    "updatedAt": "2026-11-09T06:37:44.656Z"
+  },
+  "voice/marathi/retake_lr.mp3": {
+    "text": "फोटो पुन्हा काढा. कारण: एलआर क्रमांक स्पष्ट दिसत नाही.",
+    "hash": "971a6ba76c5b9707",
+    "path": "/voice/marathi/retake_lr.mp3",
+    "updatedAt": "2026-11-09T06:37:46.158Z"
+  },
+  "voice/hindi/retake_lr.mp3": {
+    "text": "फ़ोटो दोबारा लें। कारण: एलआर नंबर स्पष्ट नहीं है।",
+    "hash": "2c9ea62de8232267",
+    "path": "/voice/hindi/retake_lr.mp3",
+    "updatedAt": "2026-11-09T06:37:47.453Z"
+  },
+  "voice/english/retake_lr.mp3": {
+    "text": "Retake photo. Reason: LR number is not visible.",
+    "hash": "15cc8c69b97dc5e6",
+    "path": "/voice/english/retake_lr.mp3",
+    "updatedAt": "2026-11-09T06:37:47.948Z"
+  },
+  "voice/marathi/retake_blurry.mp3": {
+    "text": "फोटो पुन्हा काढा. कारण: फोटो अस्पष्ट आणि धूसर आला आहे.",
+    "hash": "9765d39c84525365",
+    "path": "/voice/marathi/retake_blurry.mp3",
+    "updatedAt": "2026-11-09T06:37:48.385Z"
+  },
+  "voice/hindi/retake_blurry.mp3": {
+    "text": "फ़ोटो दोबारा लें। कारण: फ़ोटो धुंधली है।",
+    "hash": "dd1b6b4b869b3665",
+    "path": "/voice/hindi/retake_blurry.mp3",
+    "updatedAt": "2026-11-09T06:37:48.844Z"
+  },
+  "voice/english/retake_blurry.mp3": {
+    "text": "Retake photo. Reason: Photograph is blurry.",
+    "hash": "0776d76cd42242e7",
+    "path": "/voice/english/retake_blurry.mp3",
+    "updatedAt": "2026-11-09T06:37:49.303Z"
+  },
+  "voice/marathi/retake_cropped.mp3": {
+    "text": "फोटो पुन्हा काढा. कारण: कागदपत्राच्या कडा कापल्या गेल्या आहेत.",
+    "hash": "9c44d38f619d7fbd",
+    "path": "/voice/marathi/retake_cropped.mp3",
+    "updatedAt": "2026-11-09T06:37:49.749Z"
+  },
+  "voice/hindi/retake_cropped.mp3": {
+    "text": "फ़ोटो दोबारा लें। कारण: दस्तावेज़ के किनारे कट गए हैं।",
+    "hash": "c672aa1310c13f97",
+    "path": "/voice/hindi/retake_cropped.mp3",
+    "updatedAt": "2026-11-09T06:37:50.061Z"
+  },
+  "voice/english/retake_cropped.mp3": {
+    "text": "Retake photo. Reason: Document edges or corners are cut off.",
+    "hash": "5c555978348969ff",
+    "path": "/voice/english/retake_cropped.mp3",
+    "updatedAt": "2026-11-09T06:37:50.359Z"
+  },
+  "voice/marathi/start_trip.mp3": {
+    "text": "प्रवास सुरू करण्यासाठी स्टार्ट ट्रिप बटण दाबा.",
+    "hash": "af5e62f605dfe8d0",
+    "path": "/voice/marathi/start_trip.mp3",
+    "updatedAt": "2026-11-09T06:43:07.563Z"
+  },
+  "voice/hindi/start_trip.mp3": {
+    "text": "यात्रा शुरू करने के लिए स्टार्ट ट्रिप बटन दबाएं।",
+    "hash": "582030c4cc7d8f07",
+    "path": "/voice/hindi/start_trip.mp3",
+    "updatedAt": "2026-11-09T06:43:07.931Z"
+  },
+  "voice/english/start_trip.mp3": {
+    "text": "Tap Start Trip to begin your journey.",
+    "hash": "c9ff1e38f191678d",
+    "path": "/voice/english/start_trip.mp3",
+    "updatedAt": "2026-11-09T06:43:08.230Z"
+  },
+  "voice/marathi/complete_delivery.mp3": {
+    "text": "डिलिव्हरी पूर्ण झाल्यावर कम्प्लीट डिलिव्हरी बटण दाबा.",
+    "hash": "bc994f2f25a23612",
+    "path": "/voice/marathi/complete_delivery.mp3",
+    "updatedAt": "2026-11-09T06:43:08.429Z"
+  },
+  "voice/hindi/complete_delivery.mp3": {
+    "text": "सामान पहुंचाने के बाद कंप्लीट डिलीवरी बटन दबाएं।",
+    "hash": "59b18f23006c884b",
+    "path": "/voice/hindi/complete_delivery.mp3",
+    "updatedAt": "2026-11-09T06:43:08.604Z"
+  },
+  "voice/english/complete_delivery.mp3": {
+    "text": "Tap Complete Delivery when you reach the destination.",
+    "hash": "1786b96f55c47c10",
+    "path": "/voice/english/complete_delivery.mp3",
+    "updatedAt": "2026-11-09T06:43:08.832Z"
+  },
+  "voice/hindi/your_route.mp3": {
+    "text": "आपका रास्ता",
+    "hash": "532b8f9a4039c00c",
+    "path": "/voice/hindi/your_route.mp3",
+    "updatedAt": "2026-11-09T07:31:23.803Z"
+  },
+  "voice/marathi/your_route.mp3": {
+    "text": "तुमचा मार्ग",
+    "hash": "5c5a21e84c0e9847",
+    "path": "/voice/marathi/your_route.mp3",
+    "updatedAt": "2026-11-09T07:31:23.998Z"
+  },
+  "voice/english/your_route.mp3": {
+    "text": "Your route is",
+    "hash": "3fb48126bc2f6457",
+    "path": "/voice/english/your_route.mp3",
+    "updatedAt": "2026-11-09T07:31:24.195Z"
+  },
+  "voice/hindi/from.mp3": {
+    "text": "से",
+    "hash": "fa5b9e0f7c8d3d03",
+    "path": "/voice/hindi/from.mp3",
+    "updatedAt": "2026-11-09T07:31:24.333Z"
+  },
+  "voice/marathi/from.mp3": {
+    "text": "येथून",
+    "hash": "ee44a99ba34c44bf",
+    "path": "/voice/marathi/from.mp3",
+    "updatedAt": "2026-11-09T07:31:24.495Z"
+  },
+  "voice/english/from.mp3": {
+    "text": "from",
+    "hash": "75857a45899985be",
+    "path": "/voice/english/from.mp3",
+    "updatedAt": "2026-11-09T07:31:24.665Z"
+  },
+  "voice/hindi/to.mp3": {
+    "text": "तक",
+    "hash": "9387f264bd9384db",
+    "path": "/voice/hindi/to.mp3",
+    "updatedAt": "2026-11-09T07:31:24.809Z"
+  },
+  "voice/marathi/to.mp3": {
+    "text": "ते",
+    "hash": "a902760137da90a5",
+    "path": "/voice/marathi/to.mp3",
+    "updatedAt": "2026-11-09T07:31:25.192Z"
+  },
+  "voice/english/to.mp3": {
+    "text": "to",
+    "hash": "663ea1bfffe5038f",
+    "path": "/voice/english/to.mp3",
+    "updatedAt": "2026-11-09T07:31:25.355Z"
+  },
+  "voice/hindi/goods_is.mp3": {
+    "text": "सामान है",
+    "hash": "12fadecf094494e5",
+    "path": "/voice/hindi/goods_is.mp3",
+    "updatedAt": "2026-11-09T07:31:25.543Z"
+  },
+  "voice/marathi/goods_is.mp3": {
+    "text": "माल आहे",
+    "hash": "8291e873557befd0",
+    "path": "/voice/marathi/goods_is.mp3",
+    "updatedAt": "2026-11-09T07:31:25.741Z"
+  },
+  "voice/english/goods_is.mp3": {
+    "text": "Goods are",
+    "hash": "9382f2a982147b28",
+    "path": "/voice/english/goods_is.mp3",
+    "updatedAt": "2026-11-09T07:31:25.926Z"
+  },
+  "voice/hindi/quantity_is.mp3": {
+    "text": "मात्रा है",
+    "hash": "e7df6447c2797c7f",
+    "path": "/voice/hindi/quantity_is.mp3",
+    "updatedAt": "2026-11-09T07:31:26.110Z"
+  },
+  "voice/marathi/quantity_is.mp3": {
+    "text": "प्रमाण आहे",
+    "hash": "a0e3443410639b44",
+    "path": "/voice/marathi/quantity_is.mp3",
+    "updatedAt": "2026-11-09T07:31:26.300Z"
+  },
+  "voice/english/quantity_is.mp3": {
+    "text": "Quantity is",
+    "hash": "4258d568ec24f64c",
+    "path": "/voice/english/quantity_is.mp3",
+    "updatedAt": "2026-11-09T07:31:26.464Z"
+  },
+  "voice/hindi/client_is.mp3": {
+    "text": "ग्राहक है",
+    "hash": "a5a86e75b9e5e09a",
+    "path": "/voice/hindi/client_is.mp3",
+    "updatedAt": "2026-11-09T07:31:26.639Z"
+  },
+  "voice/marathi/client_is.mp3": {
+    "text": "ग्राहक आहे",
+    "hash": "23c84af0c78ac97b",
+    "path": "/voice/marathi/client_is.mp3",
+    "updatedAt": "2026-11-09T07:31:26.827Z"
+  },
+  "voice/english/client_is.mp3": {
+    "text": "Client is",
+    "hash": "b8e293256cb73085",
+    "path": "/voice/english/client_is.mp3",
+    "updatedAt": "2026-11-09T07:31:27.011Z"
+  },
+  "voice/hindi/vehicle_number_is.mp3": {
+    "text": "गाड़ी नंबर है",
+    "hash": "9a281d69e91c6ce2",
+    "path": "/voice/hindi/vehicle_number_is.mp3",
+    "updatedAt": "2026-11-09T07:31:27.187Z"
+  },
+  "voice/marathi/vehicle_number_is.mp3": {
+    "text": "गाडी क्रमांक आहे",
+    "hash": "4a7e4ca829931e4e",
+    "path": "/voice/marathi/vehicle_number_is.mp3",
+    "updatedAt": "2026-11-09T07:31:27.366Z"
+  },
+  "voice/english/vehicle_number_is.mp3": {
+    "text": "Vehicle number is",
+    "hash": "2234089c475742d2",
+    "path": "/voice/english/vehicle_number_is.mp3",
+    "updatedAt": "2026-11-09T07:31:27.553Z"
+  },
+  "voice/hindi/tap_start_trip.mp3": {
+    "text": "यात्रा शुरू करने के लिए स्टार्ट ट्रिप बटन दबाएं।",
+    "hash": "582030c4cc7d8f07",
+    "path": "/voice/hindi/tap_start_trip.mp3",
+    "updatedAt": "2026-11-09T07:31:27.784Z"
+  },
+  "voice/marathi/tap_start_trip.mp3": {
+    "text": "प्रवास सुरू करण्यासाठी स्टार्ट ट्रिप बटण दाबा.",
+    "hash": "af5e62f605dfe8d0",
+    "path": "/voice/marathi/tap_start_trip.mp3",
+    "updatedAt": "2026-11-09T07:31:27.991Z"
+  },
+  "voice/english/tap_start_trip.mp3": {
+    "text": "Tap Start Trip to begin your journey.",
+    "hash": "c9ff1e38f191678d",
+    "path": "/voice/english/tap_start_trip.mp3",
+    "updatedAt": "2026-11-09T07:31:28.318Z"
+  },
+  "voice/hindi/tap_photograph_pod.mp3": {
+    "text": "कृपया सही की हुई पावती की फोटो खींचने के लिए बटन दबाएं।",
+    "hash": "53be036b4f719811",
+    "path": "/voice/hindi/tap_photograph_pod.mp3",
+    "updatedAt": "2026-11-09T07:31:28.674Z"
+  },
+  "voice/marathi/tap_photograph_pod.mp3": {
+    "text": "कृपया सही केलेल्या पावतीचा फोटो काढण्यासाठी बटण दाबा.",
+    "hash": "a7ac9500f600ac7d",
+    "path": "/voice/marathi/tap_photograph_pod.mp3",
+    "updatedAt": "2026-11-09T07:31:28.917Z"
+  },
+  "voice/english/tap_photograph_pod.mp3": {
+    "text": "Tap Photograph POD to capture the signed delivery receipt.",
+    "hash": "bdddfb25ff3a6b0e",
+    "path": "/voice/english/tap_photograph_pod.mp3",
+    "updatedAt": "2026-11-09T07:31:29.155Z"
+  },
+  "voice/hindi/take_photo_again.mp3": {
+    "text": "कृपया दोबारा फोटो लें।",
+    "hash": "c0fa25eada22d8cb",
+    "path": "/voice/hindi/take_photo_again.mp3",
+    "updatedAt": "2026-11-09T07:31:29.454Z"
+  },
+  "voice/marathi/take_photo_again.mp3": {
+    "text": "कृपया पुन्हा फोटो काढा.",
+    "hash": "5531373d9c5eb860",
+    "path": "/voice/marathi/take_photo_again.mp3",
+    "updatedAt": "2026-11-09T07:31:29.594Z"
+  },
+  "voice/english/take_photo_again.mp3": {
+    "text": "Please take the photograph again.",
+    "hash": "6d183959a3e6b866",
+    "path": "/voice/english/take_photo_again.mp3",
+    "updatedAt": "2026-11-09T07:31:29.764Z"
+  },
+  "voice/hindi/reason_is.mp3": {
+    "text": "कारण है",
+    "hash": "1b2ffad206b2ffae",
+    "path": "/voice/hindi/reason_is.mp3",
+    "updatedAt": "2026-11-09T07:31:29.926Z"
+  },
+  "voice/marathi/reason_is.mp3": {
+    "text": "कारण आहे",
+    "hash": "57aca4eab9b8c4e6",
+    "path": "/voice/marathi/reason_is.mp3",
+    "updatedAt": "2026-11-09T07:31:30.258Z"
+  },
+  "voice/english/reason_is.mp3": {
+    "text": "Reason is",
+    "hash": "a220d93309a41e1f",
+    "path": "/voice/english/reason_is.mp3",
+    "updatedAt": "2026-11-09T07:31:30.391Z"
+  },
+  "voice/hindi/retake_number.mp3": {
+    "text": "प्रयास नंबर",
+    "hash": "82224febc4673463",
+    "path": "/voice/hindi/retake_number.mp3",
+    "updatedAt": "2026-11-09T07:31:30.531Z"
+  },
+  "voice/marathi/retake_number.mp3": {
+    "text": "प्रयत्न क्रमांक",
+    "hash": "78c3442623d0709a",
+    "path": "/voice/marathi/retake_number.mp3",
+    "updatedAt": "2026-11-09T07:31:30.730Z"
+  },
+  "voice/english/retake_number.mp3": {
+    "text": "Attempt number",
+    "hash": "b4c274c98ec6adb6",
+    "path": "/voice/english/retake_number.mp3",
+    "updatedAt": "2026-11-09T07:31:31.047Z"
+  },
+  "voice/hindi/one.mp3": {
+    "text": "एक",
+    "hash": "4716a9f9d13c6e13",
+    "path": "/voice/hindi/one.mp3",
+    "updatedAt": "2026-11-09T07:31:31.207Z"
+  },
+  "voice/marathi/one.mp3": {
+    "text": "एक",
+    "hash": "4716a9f9d13c6e13",
+    "path": "/voice/marathi/one.mp3",
+    "updatedAt": "2026-11-09T07:31:31.354Z"
+  },
+  "voice/english/one.mp3": {
+    "text": "one",
+    "hash": "7692c3ad3540bb80",
+    "path": "/voice/english/one.mp3",
+    "updatedAt": "2026-11-09T07:31:31.506Z"
+  },
+  "voice/hindi/two.mp3": {
+    "text": "दो",
+    "hash": "40f24fa04cb9ba61",
+    "path": "/voice/hindi/two.mp3",
+    "updatedAt": "2026-11-09T07:31:31.924Z"
+  },
+  "voice/marathi/two.mp3": {
+    "text": "दोन",
+    "hash": "b0a6f2f1890328d2",
+    "path": "/voice/marathi/two.mp3",
+    "updatedAt": "2026-11-09T07:31:32.302Z"
+  },
+  "voice/english/two.mp3": {
+    "text": "two",
+    "hash": "3fc4ccfe745870e2",
+    "path": "/voice/english/two.mp3",
+    "updatedAt": "2026-11-09T07:31:32.724Z"
+  },
+  "voice/hindi/of.mp3": {
+    "text": "में से",
+    "hash": "d053db995f83d003",
+    "path": "/voice/hindi/of.mp3",
+    "updatedAt": "2026-11-09T07:31:32.950Z"
+  },
+  "voice/marathi/of.mp3": {
+    "text": "पैकी",
+    "hash": "6a7f63db8b2b5308",
+    "path": "/voice/marathi/of.mp3",
+    "updatedAt": "2026-11-09T07:31:33.460Z"
+  },
+  "voice/english/of.mp3": {
+    "text": "of",
+    "hash": "28391d3bc64ec15c",
+    "path": "/voice/english/of.mp3",
+    "updatedAt": "2026-11-09T07:31:33.788Z"
+  },
+  "voice/hindi/retake_limit_reached.mp3": {
+    "text": "फोटो लेने की सीमा समाप्त हो चुकी है।",
+    "hash": "d20e2d086c694d77",
+    "path": "/voice/hindi/retake_limit_reached.mp3",
+    "updatedAt": "2026-11-09T07:31:34.229Z"
+  },
+  "voice/marathi/retake_limit_reached.mp3": {
+    "text": "फोटो काढण्याची मर्यादा संपली आहे.",
+    "hash": "3faf9640578e013b",
+    "path": "/voice/marathi/retake_limit_reached.mp3",
+    "updatedAt": "2026-11-09T07:31:34.468Z"
+  },
+  "voice/english/retake_limit_reached.mp3": {
+    "text": "Maximum photo attempts reached.",
+    "hash": "035f47e41765ee82",
+    "path": "/voice/english/retake_limit_reached.mp3",
+    "updatedAt": "2026-11-09T07:31:34.665Z"
+  },
+  "voice/hindi/office_will_check.mp3": {
+    "text": "कार्यालय टीम इसकी जांच करेगी।",
+    "hash": "d17cac07f5c6ec5f",
+    "path": "/voice/hindi/office_will_check.mp3",
+    "updatedAt": "2026-11-09T07:31:34.888Z"
+  },
+  "voice/marathi/office_will_check.mp3": {
+    "text": "कार्यालयीन चमू याची पडताळणी करेल.",
+    "hash": "3e8cf22a4d79a20a",
+    "path": "/voice/marathi/office_will_check.mp3",
+    "updatedAt": "2026-11-09T07:31:35.109Z"
+  },
+  "voice/english/office_will_check.mp3": {
+    "text": "The office team will manually review your proof.",
+    "hash": "ec806e5a75d4035d",
+    "path": "/voice/english/office_will_check.mp3",
+    "updatedAt": "2026-11-09T07:31:35.314Z"
+  },
+  "voice/hindi/receipt_with_office.mp3": {
+    "text": "दस्तावेज़ कार्यालय में समीक्षाधीन है।",
+    "hash": "dac170663b872a23",
+    "path": "/voice/hindi/receipt_with_office.mp3",
+    "updatedAt": "2026-11-09T07:31:35.509Z"
+  },
+  "voice/marathi/receipt_with_office.mp3": {
+    "text": "कागदपत्र कार्यालयात तपासणीसाठी प्रलंबित आहे.",
+    "hash": "48610a4e0d4964b0",
+    "path": "/voice/marathi/receipt_with_office.mp3",
+    "updatedAt": "2026-11-09T07:31:35.717Z"
+  },
+  "voice/english/receipt_with_office.mp3": {
+    "text": "The document is under office review.",
+    "hash": "7cc87fb362dbe44e",
+    "path": "/voice/english/receipt_with_office.mp3",
+    "updatedAt": "2026-11-09T07:31:35.920Z"
+  },
+  "voice/hindi/trip_complete.mp3": {
+    "text": "यह ट्रिप पूरी हो चुकी है।",
+    "hash": "ff93d33a718669a5",
+    "path": "/voice/hindi/trip_complete.mp3",
+    "updatedAt": "2026-11-09T07:31:36.121Z"
+  },
+  "voice/marathi/trip_complete.mp3": {
+    "text": "ही ट्रिप पूर्ण झाली आहे.",
+    "hash": "df2b77870c6f3a75",
+    "path": "/voice/marathi/trip_complete.mp3",
+    "updatedAt": "2026-11-09T07:31:36.329Z"
+  },
+  "voice/english/trip_complete.mp3": {
+    "text": "Trip is completed.",
+    "hash": "f3329180469b4c53",
+    "path": "/voice/english/trip_complete.mp3",
+    "updatedAt": "2026-11-09T07:31:36.519Z"
+  },
+  "voice/hindi/proof_accepted.mp3": {
+    "text": "डिलीवरी का सबूत स्वीकार कर लिया गया है।",
+    "hash": "cea1a89d0f1c232f",
+    "path": "/voice/hindi/proof_accepted.mp3",
+    "updatedAt": "2026-11-09T07:31:36.736Z"
+  },
+  "voice/marathi/proof_accepted.mp3": {
+    "text": "डिलिव्हरीचा पुरावा मंजूर झाला आहे.",
+    "hash": "7d7bcbc1d445641d",
+    "path": "/voice/marathi/proof_accepted.mp3",
+    "updatedAt": "2026-11-09T07:31:36.918Z"
+  },
+  "voice/english/proof_accepted.mp3": {
+    "text": "Delivery proof has been verified.",
+    "hash": "ac6d51beaa454785",
+    "path": "/voice/english/proof_accepted.mp3",
+    "updatedAt": "2026-11-09T07:31:37.298Z"
+  },
+  "voice/hindi/nothing_more_to_do.mp3": {
+    "text": "इस ट्रिप के लिए अब कुछ और नहीं करना है।",
+    "hash": "a4cbdb1732cc3a36",
+    "path": "/voice/hindi/nothing_more_to_do.mp3",
+    "updatedAt": "2026-11-09T07:31:37.732Z"
+  },
+  "voice/marathi/nothing_more_to_do.mp3": {
+    "text": "या ट्रिपसाठी आता काहीही करण्याची गरज नाही.",
+    "hash": "304f26a1be98dbdd",
+    "path": "/voice/marathi/nothing_more_to_do.mp3",
+    "updatedAt": "2026-11-09T07:31:38.245Z"
+  },
+  "voice/english/nothing_more_to_do.mp3": {
+    "text": "Nothing more to do for this trip.",
+    "hash": "77d653a571ef9df5",
+    "path": "/voice/english/nothing_more_to_do.mp3",
+    "updatedAt": "2026-11-09T07:31:38.474Z"
+  },
+  "voice/hindi/no_network_saved.mp3": {
+    "text": "नेटवर्क नहीं है। फोटो फोन में सुरक्षित है।",
+    "hash": "feff4408625bfec3",
+    "path": "/voice/hindi/no_network_saved.mp3",
+    "updatedAt": "2026-11-09T07:31:38.848Z"
+  },
+  "voice/marathi/no_network_saved.mp3": {
+    "text": "नेटवर्क नाही. फोटो फोनमध्ये सुरक्षित आहे.",
+    "hash": "295a36d11d1b36ae",
+    "path": "/voice/marathi/no_network_saved.mp3",
+    "updatedAt": "2026-11-09T07:31:39.066Z"
+  },
+  "voice/english/no_network_saved.mp3": {
+    "text": "No network. Photo saved safely on phone.",
+    "hash": "544fa903d9841de4",
+    "path": "/voice/english/no_network_saved.mp3",
+    "updatedAt": "2026-11-09T07:31:39.267Z"
+  },
+  "voice/hindi/stamp_not_visible.mp3": {
+    "text": "ग्राहक की मुहर दिखाई नहीं दे रही है",
+    "hash": "ff0a24a024bffa0f",
+    "path": "/voice/hindi/stamp_not_visible.mp3",
+    "updatedAt": "2026-11-09T07:31:39.456Z"
+  },
+  "voice/marathi/stamp_not_visible.mp3": {
+    "text": "ग्राहकाचा शिक्का दिसत नाही",
+    "hash": "455f858134388d19",
+    "path": "/voice/marathi/stamp_not_visible.mp3",
+    "updatedAt": "2026-11-09T07:31:39.647Z"
+  },
+  "voice/english/stamp_not_visible.mp3": {
+    "text": "Consignee stamp is not visible",
+    "hash": "8c33455aa1a112be",
+    "path": "/voice/english/stamp_not_visible.mp3",
+    "updatedAt": "2026-11-09T07:31:39.841Z"
+  },
+  "voice/hindi/signature_missing.mp3": {
+    "text": "पावती पर हस्ताक्षर गायब है",
+    "hash": "5a2f72d5d2c01987",
+    "path": "/voice/hindi/signature_missing.mp3",
+    "updatedAt": "2026-11-09T07:31:40.042Z"
+  },
+  "voice/marathi/signature_missing.mp3": {
+    "text": "पावतीवर स्वाक्षरी नाही",
+    "hash": "6d9a06b96c2918c8",
+    "path": "/voice/marathi/signature_missing.mp3",
+    "updatedAt": "2026-11-09T07:31:40.241Z"
+  },
+  "voice/english/signature_missing.mp3": {
+    "text": "Receiver signature is missing",
+    "hash": "0012dcbc462b61a9",
+    "path": "/voice/english/signature_missing.mp3",
+    "updatedAt": "2026-11-09T07:31:40.411Z"
+  },
+  "voice/hindi/blurry.mp3": {
+    "text": "फोटो धुंधली आई है",
+    "hash": "69ec148df3f2deef",
+    "path": "/voice/hindi/blurry.mp3",
+    "updatedAt": "2026-11-09T07:31:40.628Z"
+  },
+  "voice/marathi/blurry.mp3": {
+    "text": "फोटो अस्पष्ट आणि धूसर आला आहे",
+    "hash": "72e5c6c8b425b641",
+    "path": "/voice/marathi/blurry.mp3",
+    "updatedAt": "2026-11-09T07:31:40.887Z"
+  },
+  "voice/english/blurry.mp3": {
+    "text": "Photograph is blurry",
+    "hash": "a1fd5ab8bf1df6a9",
+    "path": "/voice/english/blurry.mp3",
+    "updatedAt": "2026-11-09T07:31:41.068Z"
+  },
+  "voice/hindi/lr_unreadable.mp3": {
+    "text": "एलआर नंबर स्पष्ट नहीं है",
+    "hash": "5b440d90e4f8f667",
+    "path": "/voice/hindi/lr_unreadable.mp3",
+    "updatedAt": "2026-11-09T07:31:41.240Z"
+  },
+  "voice/marathi/lr_unreadable.mp3": {
+    "text": "एलआर क्रमांक स्पष्ट दिसत नाही",
+    "hash": "a2fdca63c7e3c78d",
+    "path": "/voice/marathi/lr_unreadable.mp3",
+    "updatedAt": "2026-11-09T07:31:41.470Z"
+  },
+  "voice/english/lr_unreadable.mp3": {
+    "text": "LR number is unreadable",
+    "hash": "7ffaadf9574eaec5",
+    "path": "/voice/english/lr_unreadable.mp3",
+    "updatedAt": "2026-11-09T07:31:41.635Z"
+  },
+  "voice/hindi/date_missing.mp3": {
+    "text": "डिलीवरी की तारीख नहीं दिख रही है",
+    "hash": "885441d65fbce2c9",
+    "path": "/voice/hindi/date_missing.mp3",
+    "updatedAt": "2026-11-09T07:31:41.831Z"
+  },
+  "voice/marathi/date_missing.mp3": {
+    "text": "डिलिव्हरीची तारीख दिसत नाही",
+    "hash": "0d5e87e06dce73f1",
+    "path": "/voice/marathi/date_missing.mp3",
+    "updatedAt": "2026-11-09T07:31:42.239Z"
+  },
+  "voice/english/date_missing.mp3": {
+    "text": "Delivery date is missing",
+    "hash": "4ff427f6c94adab3",
+    "path": "/voice/english/date_missing.mp3",
+    "updatedAt": "2026-11-09T07:31:42.793Z"
+  },
+  "voice/hindi/cut_off.mp3": {
+    "text": "कागज़ के कोने कट गए हैं",
+    "hash": "3b79c1150c87066d",
+    "path": "/voice/hindi/cut_off.mp3",
+    "updatedAt": "2026-11-09T07:31:43.419Z"
+  },
+  "voice/marathi/cut_off.mp3": {
+    "text": "कागदपत्राच्या कडा कापल्या गेल्या आहेत",
+    "hash": "cd85129114470fcc",
+    "path": "/voice/marathi/cut_off.mp3",
+    "updatedAt": "2026-11-09T07:31:43.954Z"
+  },
+  "voice/english/cut_off.mp3": {
+    "text": "Document corners are cut off",
+    "hash": "cf2d1b5ef4759a20",
+    "path": "/voice/english/cut_off.mp3",
+    "updatedAt": "2026-11-09T07:31:44.186Z"
+  },
+  "voice/hindi/unclear_photo.mp3": {
+    "text": "फोटो स्पष्ट नहीं है",
+    "hash": "b912c922a99f5c30",
+    "path": "/voice/hindi/unclear_photo.mp3",
+    "updatedAt": "2026-11-09T07:31:44.400Z"
+  },
+  "voice/marathi/unclear_photo.mp3": {
+    "text": "फोटो स्पष्ट नाही",
+    "hash": "cd368565ebaad565",
+    "path": "/voice/marathi/unclear_photo.mp3",
+    "updatedAt": "2026-11-09T07:31:44.578Z"
+  },
+  "voice/english/unclear_photo.mp3": {
+    "text": "Photograph is not clear",
+    "hash": "ee0f7d6f5a9d0b3a",
+    "path": "/voice/english/unclear_photo.mp3",
+    "updatedAt": "2026-11-09T07:31:44.746Z"
+  }
+}
