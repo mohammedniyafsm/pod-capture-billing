@@ -20,8 +20,10 @@ import {
 } from "@/src/lib/offline/indexeddb/db";
 import { syncPendingPods } from "@/src/lib/offline/sync/podSync";
 import { compressPodImage } from "@/src/lib/pods/storage/compression";
+import { buildSegments, VoiceLanguage } from "@/src/lib/voice/hybrid";
+import { HybridSegmentPlayer } from "@/src/lib/voice/player";
 
-type DriverLanguage = "Hindi" | "Marathi" | "English";
+type DriverLanguage = VoiceLanguage;
 
 type DriverTrip = {
   id: string;
@@ -168,6 +170,11 @@ export default function DriverPage() {
 
   // Language state (Hindi / Marathi / English)
   const [language, setLanguage] = useState<DriverLanguage>("Hindi");
+
+  // Voice playback state
+  const [isPlayingAudio, setIsPlayingAudio] = useState(false);
+  const [voiceNotice, setVoiceNotice] = useState<string | null>(null);
+  const playerRef = useRef<HybridSegmentPlayer | null>(null);
 
   const refreshPendingCount = useCallback(async () => {
     try {
@@ -577,58 +584,76 @@ export default function DriverPage() {
   };
 
   /* -------------------------------------------------------------------------- */
-  /* Voice Prompt (Web SpeechSynthesis API in hi-IN / mr-IN / en-IN)             */
+  /* Hybrid Voice Prompt (Fixed Clips + On-Device English Spoken Values)        */
   /* -------------------------------------------------------------------------- */
-  const speakCurrentInstruction = () => {
-    if (typeof window === "undefined" || !("speechSynthesis" in window)) return;
+  const stopAudio = useCallback(() => {
+    if (playerRef.current) {
+      playerRef.current.cancel();
+      playerRef.current = null;
+    }
+    setIsPlayingAudio(false);
+  }, []);
+
+  // Cancel playback on trip or language change, or when unmounting
+  useEffect(() => {
+    if (playerRef.current) {
+      playerRef.current.cancel();
+      playerRef.current = null;
+    }
+
+    return () => {
+      if (playerRef.current) {
+        playerRef.current.cancel();
+        playerRef.current = null;
+      }
+    };
+  }, [selectedTrip, language]);
+
+  const speakCurrentInstruction = async () => {
     if (!selectedTrip) return;
 
-    let text = "";
-    if (selectedTrip.status === "ASSIGNED") {
-      text =
-        language === "Hindi"
-          ? "यात्रा शुरू करने के लिए स्टार्ट ट्रिप बटन दबाएं।"
-          : language === "Marathi"
-          ? "प्रवास सुरू करण्यासाठी स्टार्ट ट्रिप बटण दाबा."
-          : "Tap Start Trip to begin your journey.";
-    } else if (selectedTrip.status === "IN_TRANSIT") {
-      text =
-        language === "Hindi"
-          ? "सामान पहुंचाने के बाद कंप्लीट डिलीवरी बटन दबाएं।"
-          : language === "Marathi"
-          ? "डिलिव्हरी पूर्ण झाल्यावर कम्प्लीट डिलिव्हरी बटण दाबा."
-          : "Tap Complete Delivery when you reach the destination.";
-    } else if (selectedTrip.status === "VERIFIED") {
-      text =
-        language === "Hindi"
-          ? "पीओडी सत्यापित हो चुका है। अब कुछ करने की आवश्यकता नहीं है।"
-          : language === "Marathi"
-          ? "पीओडी पडताळणी झाली आहे. पुढील कोणतीही कृती आवश्यक नाही."
-          : "POD verified. Nothing more to do.";
-    } else if (selectedTrip.status === "RETAKE_REQUESTED") {
-      text =
-        language === "Hindi"
-          ? "फ़ोटो स्पष्ट नहीं है। कृपया स्टैम्प और हस्ताक्षर के साथ दोबारा फ़ोटो लें।"
-          : language === "Marathi"
-          ? "फोटो स्पष्ट नाही. कृपया शिक्का आणि सहीसह पुन्हा फोटो काढा."
-          : "The photo was not clear. Please photograph the POD again with stamp and signature visible.";
-    } else {
-      text =
-        language === "Hindi"
-          ? "कृपया हस्ताक्षरित डिलीवरी चालान की साफ़ फ़ोटो खींचें और अपलोड करें।"
-          : language === "Marathi"
-          ? "कृपया सही केलेल्या पोहोच पावतीचा स्पष्ट फोटो काढून अपलोड करा."
-          : "Please take a clear photograph of the signed POD document.";
+    // Toggle stop if already playing
+    if (isPlayingAudio) {
+      stopAudio();
+      return;
     }
 
-    try {
-      window.speechSynthesis.cancel();
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.lang = language === "Hindi" ? "hi-IN" : language === "Marathi" ? "mr-IN" : "en-IN";
-      window.speechSynthesis.speak(utterance);
-    } catch {
-      // SpeechSynthesis error non-critical
-    }
+    setVoiceNotice(null);
+
+    const segments = buildSegments(
+      {
+        id: selectedTrip.id,
+        tripCode: selectedTrip.tripCode,
+        origin: selectedTrip.origin,
+        destination: selectedTrip.destination,
+        vehicleNo: selectedTrip.vehicleNo,
+        client: selectedTrip.client,
+        goodsDescription: selectedTrip.goodsDescription,
+        expectedQuantity: selectedTrip.expectedQuantity,
+        quantityUnit: selectedTrip.quantityUnit,
+        status: selectedTrip.status,
+        retakeReason: selectedTrip.podSubmissions[0]?.retakeReason || selectedTrip.statusReason,
+        retakeCount: selectedTrip.retakeCount,
+      },
+      selectedTrip.status,
+      language
+    );
+
+    const player = new HybridSegmentPlayer();
+    playerRef.current = player;
+
+    await player.playSegments(segments, language, {
+      onStart: () => setIsPlayingAudio(true),
+      onEnd: () => {
+        setIsPlayingAudio(false);
+        playerRef.current = null;
+      },
+      onError: (msg) => {
+        setIsPlayingAudio(false);
+        playerRef.current = null;
+        setVoiceNotice(msg);
+      },
+    });
   };
 
   // Human retake reason translation
@@ -790,7 +815,10 @@ export default function DriverPage() {
               {idx > 0 && <span className="text-[#e3e6e8] select-none">·</span>}
               <button
                 type="button"
-                onClick={() => setLanguage(lang)}
+                onClick={() => {
+                  stopAudio();
+                  setLanguage(lang);
+                }}
                 className={`transition-colors py-0.5 px-1 focus:outline-none ${
                   language === lang
                     ? "font-semibold text-[#0B4044] underline underline-offset-4"
@@ -1053,21 +1081,38 @@ export default function DriverPage() {
                         </button>
                       )}
 
-                      {/* 🔊 Voice Prompt Button */}
+                      {/* 🔊 Voice Prompt Button (Toggles play/stop) */}
                       <button
                         type="button"
-                        onClick={speakCurrentInstruction}
+                        onClick={() => void speakCurrentInstruction()}
                         className="flex h-16 w-16 shrink-0 items-center justify-center rounded-[10px] border border-[#e3e6e8] bg-white text-[#0B4044] transition-colors hover:bg-neutral-50 active:bg-neutral-100 focus:outline-none focus:ring-3 focus:ring-[#0B4044]/20"
-                        aria-label={`Listen to instruction in ${language}`}
-                        title={`Listen to instruction in ${language}`}
+                        aria-label={isPlayingAudio ? "Stop spoken instruction" : `Listen to instruction in ${language}`}
+                        title={isPlayingAudio ? "Stop spoken instruction" : `Listen to instruction in ${language}`}
                       >
-                        <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                          <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
-                          <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
-                          <path d="M19.07 4.93a10 10 0 0 1 0 14.14" />
-                        </svg>
+                        {isPlayingAudio ? (
+                          <svg className="h-6 w-6 text-[#0B4044]" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                            <rect x="6" y="6" width="12" height="12" rx="2" />
+                          </svg>
+                        ) : (
+                          <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+                            <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
+                            <path d="M19.07 4.93a10 10 0 0 1 0 14.14" />
+                          </svg>
+                        )}
                       </button>
                     </div>
+
+                    {/* Visible Notice if Voice is unavailable */}
+                    {voiceNotice ? (
+                      <div
+                        role="alert"
+                        aria-live="polite"
+                        className="mt-2 rounded-[8px] border border-amber-200 bg-amber-50 px-3 py-2 text-[12px] text-amber-900"
+                      >
+                        {voiceNotice}
+                      </div>
+                    ) : null}
 
                     <input
                       ref={fileInputRef}
@@ -1142,6 +1187,7 @@ export default function DriverPage() {
                     key={trip.id}
                     type="button"
                     onClick={() => {
+                      stopAudio();
                       setSelectedTripId(trip.id);
                       window.scrollTo({ top: 0, behavior: "smooth" });
                     }}

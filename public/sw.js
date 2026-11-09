@@ -19,6 +19,29 @@ const ESSENTIAL_ASSETS = [
   "/icon-512.svg",
 ];
 
+const VOICE_CACHE_NAME = "fleetproof-voice-v1";
+
+const VOICE_FIXED_KEYS = [
+  "your_route", "from", "to", "goods_is", "quantity_is", "client_is", "vehicle_number_is",
+  "tap_start_trip", "tap_photograph_pod", "take_photo_again", "reason_is", "retake_number",
+  "one", "two", "of", "retake_limit_reached", "office_will_check", "receipt_with_office",
+  "trip_complete", "proof_accepted", "nothing_more_to_do", "no_network_saved",
+  "stamp_not_visible", "signature_missing", "blurry", "lr_unreadable", "date_missing", "cut_off", "unclear_photo"
+];
+
+function precacheVoiceClips() {
+  if (typeof caches === "undefined") return Promise.resolve();
+  return caches.open(VOICE_CACHE_NAME).then((cache) => {
+    const assets = [];
+    for (const lang of ["hindi", "marathi", "english"]) {
+      for (const key of VOICE_FIXED_KEYS) {
+        assets.push(`/voice/${lang}/${key}.mp3`);
+      }
+    }
+    return cache.addAll(assets).catch(() => {});
+  });
+}
+
 // Guard against execution in a non‑Service‑Worker environment (e.g., node tests)
 if (typeof self !== "undefined") {
   // Install – pre‑cache the essential static assets
@@ -64,8 +87,8 @@ function handleFetch(event) {
   // 2️⃣ Only handle GET requests
   if (event.request.method !== "GET") return;
 
-  // 3️⃣ Immutable static assets – cache‑first
-  if (url.pathname.startsWith("/_next/static/")) {
+  // 3️⃣ Immutable static assets & voice audio – cache‑first
+  if (url.pathname.startsWith("/_next/static/") || url.pathname.startsWith("/voice/")) {
     event.respondWith(
       caches.match(event.request).then((cached) => {
         if (cached) return cached;
