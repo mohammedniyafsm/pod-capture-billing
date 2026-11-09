@@ -1,0 +1,12 @@
+trip_code,client,vehicle_no,is_hired,origin,destination,freight,lr_number,eway_bill_no,goods,quantity,unit,branch,driver_phone
+TRIP-IMP-001,Sahyadri Cements Ltd,MH20 EL 4521,false,Chhatrapati Sambhajinagar,Mumbai,34500,LR-IMP-001,261188000001,Portland Pozzolana Cement,25,tonnes,Chh. Sambhajinagar,9000000001
+TRIP-IMP-002,MahaSteel Ispat Corp,MH20 GT 7718,false,Pune,Nagpur,42000,LR-IMP-002,261188000002,TMT Rebars Fe 550D,20,tonnes,Pune,9000000003
+TRIP-IMP-003,KisanAgro Foods & Grains,MH20 FN 6101,true,Jalna,Kolhapur,36000,LR-IMP-003,261188000003,Refined Wheat Flour & Grains,500,bags,Chh. Sambhajinagar,9876543210
+TRIP-IMP-004,Deccan FMCG Distributors,MH12 KR 8202,true,Pune,Goa,35000,LR-IMP-004,261188000004,FMCG Packaged Personal Care,450,cartons,Pune,9876543211
+TRIP-IMP-005,Godavari Heavy Engineering,MH20 DY 3341,false,Nagpur,Hyderabad,38500,LR-IMP-005,261188000005,Fabricated Engineering Spares,15,crates,Nagpur,9000000008
+TRIP-IMP-006,Vidarbha Infra & Concrete,MH31 CV 9021,false,Nagpur,Raipur,29500,LR-IMP-006,261188000006,Ready-Mix Aggregate Concrete,24,tonnes,Nagpur,9000000009
+TRIP-IMP-007,Western Agro Processing,MH12 QW 5512,false,Pune,Indore,39700,LR-IMP-007,261188000007,Soyabean & Mustard Feed,220,quintals,Pune,9000000005
+TRIP-IMP-008,Marathwada Steel Mills,MH20 AB 1100,true,Chhatrapati Sambhajinagar,Surat,39000,LR-IMP-008,261188000008,Structural Steel Channels,18,tonnes,Chh. Sambhajinagar,9876543212
+TRIP-IMP-009,Panchavati Spices & Packaged Goods,MH15 BC 4490,false,Nashik,Pune,26000,LR-IMP-009,261188000009,Packed Blended Spices,320,boxes,Pune,9000000007
+TRIP-IMP-010,Ajanta Industrial Equipments,MH20 ZZ 9901,true,Chhatrapati Sambhajinagar,Nashik,24500,LR-IMP-010,261188000010,Industrial Precision Valves,12,pallets,Chh. Sambhajinagar,9876543213
+
