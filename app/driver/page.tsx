@@ -740,9 +740,10 @@ export default function DriverPage() {
   const retakeLimitReached =
     Boolean(
       selectedTrip &&
-        (selectedTrip.retakeCount && selectedTrip.retakeCount >= 2) ||
-        selectedTrip?.status === "NEEDS_REVIEW" ||
-        selectedTrip?.podSubmissions[0]?.attemptsLeft === 0,
+        ((selectedTrip.retakeCount && selectedTrip.retakeCount >= 2) ||
+          selectedTrip?.status === "NEEDS_REVIEW" ||
+          (selectedTrip?.status !== "RETAKE_REQUESTED" &&
+            selectedTrip?.podSubmissions[0]?.attemptsLeft === 0)),
     );
 
   return (
