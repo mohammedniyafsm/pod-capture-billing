@@ -143,7 +143,50 @@ function extractFieldUnit(val: unknown): string | null {
 }
 
 function displayReason(reason: string) {
-  return reason.replaceAll("_", " ");
+  switch (reason) {
+    case "retake_limit":
+      return "Retake limit exhausted";
+    case "lr_mismatch":
+      return "LR mismatch";
+    case "lr_not_visible":
+      return "LR not visible";
+    case "stamp_not_visible":
+      return "Consignee stamp missing";
+    case "signature_missing":
+      return "Signature missing";
+    case "quantity_unreadable":
+      return "Quantity unreadable";
+    case "quantity_mismatch":
+      return "Quantity mismatch";
+    case "quantity_unit_unreadable":
+      return "Quantity unit unreadable";
+    case "quantity_unit_mismatch":
+      return "Quantity unit mismatch";
+    case "goods_unreadable":
+      return "Goods unreadable";
+    case "goods_mismatch":
+      return "Goods mismatch";
+    case "delivery_date_unreadable":
+      return "Delivery date unreadable";
+    case "delivery_date_invalid":
+      return "Delivery date invalid";
+    case "delivery_date_mismatch":
+      return "Delivery date mismatch";
+    case "shortage_remark":
+      return "Shortage remark noted";
+    case "damage":
+      return "Damage noted";
+    case "low_confidence":
+      return "Low AI confidence";
+    case "ai_unavailable":
+      return "AI review unavailable";
+    case "blurry":
+      return "Blurry photo";
+    case "cropped":
+      return "Cropped document edges";
+    default:
+      return reason.replaceAll("_", " ");
+  }
 }
 
 function confidencePresentation(value: number) {
@@ -341,6 +384,7 @@ export default function ReviewPage({
       .then((payload) => {
         if (active) {
           setTripsState({ status: "ready", data: payload.trips });
+          void refreshReviewCount();
           if (payload.pagination) {
             setPagination(payload.pagination);
           } else {
@@ -463,6 +507,7 @@ export default function ReviewPage({
   const refreshList = () => {
     setTripsState((current) => ({ status: "loading", data: current.data }));
     setRefreshKey((key) => key + 1);
+    void refreshReviewCount();
   };
 
   const syncUrl = (nextReason: string, nextBranch: string, nextSearch: string, nextPage: number) => {
@@ -748,11 +793,24 @@ export default function ReviewPage({
                 </div>
                 <div>
                   <span className="billing-status is-danger">{currentExtraction?.verdict ?? "NEEDS REVIEW"}</span>
-                  <p className="billing-review-subline">
-                    {currentExtraction?.reasons.length
-                      ? currentExtraction.reasons.map(displayReason).join(", ")
-                      : "No AI reason was recorded"}
-                  </p>
+                  <div className="mt-1 flex flex-wrap gap-1">
+                    {currentExtraction?.reasons.length ? (
+                      currentExtraction.reasons.map((r) => (
+                        <span
+                          key={r}
+                          className={`inline-flex items-center rounded px-1.5 py-0.5 text-[10px] font-medium ${
+                            r === "retake_limit"
+                              ? "bg-amber-100 text-amber-900 border border-amber-300 font-semibold"
+                              : "bg-neutral-100 text-neutral-800 border border-neutral-200"
+                          }`}
+                        >
+                          {displayReason(r)}
+                        </span>
+                      ))
+                    ) : (
+                      <span className="text-[11px] text-neutral-500">No AI reason recorded</span>
+                    )}
+                  </div>
                 </div>
                 <div>
                   <p className="billing-review-subline">
@@ -950,7 +1008,7 @@ export default function ReviewPage({
                     {/* Verdict & Reasons Header Bar */}
                     <div className="billing-ai-verdict-box">
                       <div className="flex items-center gap-2">
-                        <span className="text-[10px] font-bold uppercase tracking-wider text-neutral-500">
+                        <span className="text-[11px] font-bold uppercase tracking-wider text-neutral-600">
                           AI Verdict:
                         </span>
                         <span
@@ -965,12 +1023,25 @@ export default function ReviewPage({
                           {extraction?.verdict ?? "UNAVAILABLE"}
                         </span>
                       </div>
-                      <div className="text-right">
-                        <span className="text-[11px] text-neutral-600 font-medium">
-                          {extraction?.reasons && extraction.reasons.length > 0
-                            ? extraction.reasons.map(displayReason).join(", ")
-                            : "No anomalies detected"}
-                        </span>
+                      <div className="flex flex-wrap items-center justify-end gap-1.5 max-w-[65%]">
+                        {extraction?.reasons && extraction.reasons.length > 0 ? (
+                          extraction.reasons.map((r) => (
+                            <span
+                              key={r}
+                              className={`inline-flex items-center rounded-md px-2 py-0.5 text-[11px] font-medium ${
+                                r === "retake_limit"
+                                  ? "bg-amber-100 text-amber-900 border border-amber-300 font-semibold"
+                                  : "bg-neutral-100 text-neutral-800 border border-neutral-200"
+                              }`}
+                            >
+                              {displayReason(r)}
+                            </span>
+                          ))
+                        ) : (
+                          <span className="text-[12px] text-neutral-600 font-medium">
+                            No anomalies detected
+                          </span>
+                        )}
                       </div>
                     </div>
 
