@@ -251,7 +251,7 @@ export function decideVerdict(
         retakeReason: "lr_mismatch",
       };
     }
-    return { verdict: "REVIEW", reasons: ["lr_mismatch"] };
+    return { verdict: "REVIEW", reasons: ["retake_limit", "lr_mismatch"] };
   }
 
   if (fields?.quantity_received === null || fields?.quantity_received === undefined) {

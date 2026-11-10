@@ -122,7 +122,7 @@ describe("decideVerdict", () => {
     {
       name: "reviews LR mismatch after the retake limit",
       count: 2,
-      expected: { verdict: "REVIEW", reasons: ["lr_mismatch"] },
+      expected: { verdict: "REVIEW", reasons: ["retake_limit", "lr_mismatch"] },
     },
   ])("$name", ({ count, expected }) => {
     expect(
